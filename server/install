@@ -1,0 +1,3 @@
+pip install wget
+pip install patool
+pip install pyunpack
