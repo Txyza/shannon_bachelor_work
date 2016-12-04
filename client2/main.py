@@ -8,7 +8,7 @@
 import socket
 import random
 import os
-
+import time
 def generationKey(server):
     P = int(server.recv(1024).decode())
     G = int(server.recv(1024).decode())
@@ -16,6 +16,10 @@ def generationKey(server):
     Xb = random.randint(0, (2 ** 128) - 1)
     Yb = powmod(G, Xb, P)
     server.send(str(Yb).encode())
+    print("P == ", P)
+    print("G == ", G)
+    print("Ya == ", Ya)
+    print("Yb == ", Yb)
     print("Z == ", powmod(Ya, Xb, P))
     return powmod(Ya, Xb, P)
 
@@ -30,14 +34,15 @@ def powmod(a, step, mod):
     return b % mod
 
 def downloadFiles(server):
-    #server.send("5012".encode())                   # Необходимая длина шифр-текста
+    time.sleep(1)
+    server.send("21045".encode("utf-8"))                   # Необходимая длина шифр-текста
     data = ""
-    for i in range(2):
-        filename = server.recv(1024).decode()
-        print(filename)
-        file = open("text/"+filename, "w")
+    for i in range(128):
+        filename = server.recv(2048).decode()
+        #print(filename)
+        file = open("text/"+str(i)+".txt", "w")
         while True:
-            data = server.recv(1024).decode("utf-8")
+            data = server.recv(2048).decode("utf-8")
             if data == "next":
                 break
             else:
@@ -45,7 +50,7 @@ def downloadFiles(server):
             if not data:
                 break
         file.close()
-        print(data)
+        #print(data)
 
 def deltext():
     list = os.listdir(path=".\\text")
@@ -60,5 +65,5 @@ if __name__ == '__main__':
     deltext()
     Z = generationKey(server)
     downloadFiles(server)
-    deltext()
+    #deltext()
     server.close()

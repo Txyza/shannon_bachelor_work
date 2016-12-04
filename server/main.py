@@ -17,32 +17,34 @@ class Shannon(socketserver.BaseRequestHandler):
         self.Q = 0
         self.DiffieHellman()
         self.bits()
+        #self.downloadFiles()
         self.downloadFiles()
-        #self.textnames()
 
     def downloadFiles(self):
-        #len = int(self.request.recv(1024).decode())    # Прием необходимой длинны текста
-        len = 10245*3
-        print(len)
-        list = self.textnames()
+        time.sleep(0.2)
+        len = int(self.request.recv(512).decode("utf-8"))   # Прием необходимой длинны текста
+        #len = 10245*3
+        #print(len)
+
+        list = self.selection()
         for text in list:
             print(text)
-            file = open("text/"+text, "r")
-
-            self.request.send(text.encode())
+            file = open("textCode/" + text, "r")
             time.sleep(0.2)
-            line = file.read(512)
-            inlen = 512
+            line = file.read(1024)
+            lenText = os.path.getsize("textCode/"+text)
+            inlen = 1024
+            #print(lenText)
             while line:
-                if inlen > len:
-                    self.request.send("next".encode())
+                if inlen > len or lenText <= inlen:
+                    self.request.send("next".encode("utf-8"))
                     break
                 else:
                     self.request.send(line.encode("utf-8"))
                 time.sleep(0.2)
-                line = file.read(512)
-                inlen += 512
-                print(len, " -> " ,inlen)
+                line = file.read(1024)
+                inlen += 1024
+                #print(len, " -> " ,inlen)
             file.close()
 
     def DiffieHellman(self):
@@ -63,6 +65,10 @@ class Shannon(socketserver.BaseRequestHandler):
         time.sleep(0.2)
         self.Yb = int(self.request.recv(1024).decode())
         self.Zb = self.powmod(self.Yb, self.Xa, self.P)
+        print("P == ", self.P)
+        print("G == ", self.G)
+        print("Ya == ", self.Ya)
+        print("Yb == ", self.Yb)
         print("Z == ", self.Zb)
 
     def powmod(self, a, step, mod):
@@ -100,7 +106,6 @@ class Shannon(socketserver.BaseRequestHandler):
 
     def bits(self):
         n = self.Zb
-        print("n == ", n)
         ans = []
         for i in range(0,128):
             a = self.bit(n, i)
@@ -112,6 +117,18 @@ class Shannon(socketserver.BaseRequestHandler):
     def textnames(self):
         list = os.listdir(path=".\\text")
         return list
+
+    def selection(self):
+        list = os.listdir("textCode/")
+        lenList = len(list)
+        ans = []
+        while 1:
+            select = random.randint(0,lenList-1)
+            if (list[select] in ans) == False:
+                ans.append(list[select])
+            if len(ans) == 128:
+                break
+        return ans
 
 
 if __name__ == '__main__':
