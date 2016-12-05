@@ -16,10 +16,10 @@ class Shannon(socketserver.BaseRequestHandler):
         self.P = 0;        self.G = 0;        self.Zb = 0
         self.Q = 0
         self.DiffieHellman()
-        self.bits()
+        ans = self.bits()
         self.downloadMessage()
-        #self.downloadFiles()
-        self.xorText()
+        self.downloadFiles()
+        self.xorText(ans)
 
     def DiffieHellman(self):
         self.Q = random.randint(0, (2 ** 128) - 1)
@@ -58,29 +58,25 @@ class Shannon(socketserver.BaseRequestHandler):
     def downloadMessage(self):
         data = ""
         for i in range(1, 2):
-            # print(filename)
             file = open(str(i) + ".txt", "w")
             while True:
-                time.sleep(0.2)
-                data = self.request.recv(2048).decode("utf-8")
-                #print(data)
+                data = self.request.recv(32768).decode("utf-8")
                 if data == "next":
                     break
                 else:
                     file.write(data)
                 if not data:
                     break
-
             file.close()
 
     def downloadFiles(self):
         time.sleep(1)
         data = ""
-        for i in range(1,5):
+        for i in range(0,128):
             file = open("text/" + str(i) + ".txt", "w")
             while True:
-                data = self.request.recv(2048).decode("utf-8")
-                #print("\n"+data)
+                data = self.request.recv(40960).decode("utf-8")
+                #print(data)
                 if data == "next":
                     break
                 else:
@@ -121,24 +117,24 @@ class Shannon(socketserver.BaseRequestHandler):
             if a == 1:
                 sum1 += 1
             ans.append(a)
-        print(ans)
-        print(sum1)
         file = open("statistics_bits128.txt", "a")
         file.write(str(sum1)+"\n")
         file.close()
+        return ans
 
     def bit(self, num, pos):
         return (num & (1 << pos)) >> pos
 
-    def xorText(self):
+    def xorText(self, list):
         file = open("1.txt", "r")
         text1 = file.read()
         text1 = base64.b64decode(text1).decode()
-        for i in range(1, 5):
-            file2 = open("text/" + str(i) + ".txt", "r")
-            text2 = file2.read()
-            file2.close()
-            text1 = self.xor(text1, text2)
+        for i in list:
+            if i == 1:
+                file2 = open("text/" + str(i) + ".txt", "r")
+                text2 = file2.read()
+                file2.close()
+                text1 = self.xor(text1, text2)
         file2 = open("message.txt", "w")
         file2.write(text1)
         file2.close()
@@ -155,6 +151,6 @@ class Shannon(socketserver.BaseRequestHandler):
         return ans
 
 if __name__ == '__main__':
-    HOST, PORT = "0.0.0.0", 1337
+    HOST, PORT = "0.0.0.0", 1338
     server = socketserver.TCPServer((HOST, PORT), Shannon)
     server.serve_forever()

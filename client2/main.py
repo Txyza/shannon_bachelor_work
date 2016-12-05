@@ -39,11 +39,11 @@ def downloadFiles(server):
     time.sleep(1)
     server.send("210450".encode("utf-8"))                   # Необходимая длина шифр-текста
     data = ""
-    for i in range(128):
+    for i in range(0, 128):
         print(i)
         file = open("text/"+str(i)+".txt", "w")
         while True:
-            data = server.recv(32768).decode("utf-8")
+            data = server.recv(262144*2).decode("utf-8")
             if data == "next":
                 break
             else:
@@ -62,34 +62,34 @@ def sendMessage(server, text1):
         file = open("message.txt", "r")
         time.sleep(0.2)
         lenText = os.path.getsize("message.txt")
-        line = file.read(1024)
-        inlen = 1024
+        line = file.read(16384)
+        inlen = 16384
         while line:
             time.sleep(0.1)
             server.send(line.encode("utf-8"))
             if(inlen > lenText): break
             time.sleep(0.2)
-            line = file.read(1024)
-            inlen += 1024
+            line = file.read(16384)
+            inlen += 16384
         file.close()
         server.send("next".encode("utf-8"))
         time.sleep(0.5)
 
 def sendFiles(server):
-
-    for text in range(1,5):
+    for text in range(0,128):
         print(text)
         file = open("text/" + str(text)+ ".txt", "r")
         time.sleep(0.2)
-        line = file.read(512)
+        line = file.read(10240)
         lenText = os.path.getsize("text/" + str(text) + ".txt")
-        print(lenText)
-        inlen = 512
+        print("size = ", lenText)
+        #inlen = 131072
         while line:
+            #print(line)
             server.send(line.encode("utf-8"))
-            time.sleep(0.2)
-            line = file.read(512)
-            inlen += 512
+            time.sleep(0.5)
+            line = file.read(10240)
+            #inlen += 131072
             #print(lenText, " -> ", inlen)
         server.send("next".encode("utf-8"))
         time.sleep(0.5)
@@ -101,14 +101,28 @@ def deltext():
         os.remove("text\\"+text)
     return list
 
-def xorText():
+def bits(n):
+    ans = []
+    sum1 = 0
+    for i in range(0, 128):
+        a = bit(n, i)
+        if a == 1:
+            sum1 += 1
+        ans.append(a)
+    return ans
+
+def bit(num, pos):
+    return (num & (1 << pos)) >> pos
+
+def xorText(list):
     file = open("1.txt", "r")
     text1 = file.read()
-    for i in range(1, 5):
-        file2 = open("text/" + str(i) + ".txt", "r")
-        text2 = file2.read()
-        file2.close()
-        text1 = xor(text1, text2)
+    for i in list:
+        if i == 1:
+            file2 = open("text/" + str(i) + ".txt", "r")
+            text2 = file2.read()
+            file2.close()
+            text1 = xor(text1, text2)
     text1 = base64.b64encode(text1.encode())
     file2 = open("message.txt", "w")
     file2.write(text1.decode())
@@ -117,7 +131,6 @@ def xorText():
     return text1
 
 def xor(text1, text2):
-
     lenText2 = len(text2)
     j = 0
     ans = ""
@@ -135,9 +148,15 @@ if __name__ == '__main__':
     server.connect((HOST, PORT))
     Z = generationKey(server)
     downloadFiles(server)
-    text1 = xorText()
+    server.close()
     '''            2 КЛИЕНТУ        '''
-    #sendMessage(server, text1)  # Клиенту
-    #sendFiles(server)
+    HOST, PORT = "127.0.0.1", 1338
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect((HOST, PORT))
+    Z = generationKey(server)
+    ans = bits(Z)
+    text1 = xorText(ans)
+    sendMessage(server, text1)  # Клиенту
+    sendFiles(server)
     #deltext()
     server.close()

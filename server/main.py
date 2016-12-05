@@ -30,10 +30,10 @@ class Shannon(socketserver.BaseRequestHandler):
             print(text)
             file = open("textCode/" + text, "r")
             time.sleep(0.2)
-            line = file.read(16384)
+            line = file.read(262144)
             lenText = os.path.getsize("textCode/"+text)
             print(lenText)
-            inlen = 16384
+            inlen = 262144
             self.request.send(line.encode("utf-8"))
             time.sleep(0.2)
             while line:
@@ -46,8 +46,8 @@ class Shannon(socketserver.BaseRequestHandler):
                     #line = base64.b64encode(line)#.encode("utf-8"))
                     #print("text = ", line)
                     time.sleep(0.2)
-                    line = file.read(16384)
-                    inlen += 16384
+                    line = file.read(262144)
+                    inlen += 262144
                     self.request.send(line.encode("utf-8"))
 
             file.close()
