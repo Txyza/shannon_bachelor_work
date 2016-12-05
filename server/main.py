@@ -9,6 +9,7 @@ import socketserver
 import random
 import time
 import os
+import base64
 
 class Shannon(socketserver.BaseRequestHandler):
 
@@ -17,34 +18,38 @@ class Shannon(socketserver.BaseRequestHandler):
         self.Q = 0
         self.DiffieHellman()
         self.bits()
-        #self.downloadFiles()
-        self.downloadFiles()
 
-    def downloadFiles(self):
+        #self.downloadFiles()
+        self.sendFiles()
+
+    def sendFiles(self):
         time.sleep(0.2)
         len = int(self.request.recv(512).decode("utf-8"))   # Прием необходимой длинны текста
-        #len = 10245*3
-        #print(len)
-
         list = self.selection()
         for text in list:
             print(text)
             file = open("textCode/" + text, "r")
             time.sleep(0.2)
-            line = file.read(1024)
+            line = file.read(16384)
             lenText = os.path.getsize("textCode/"+text)
-            inlen = 1024
-            #print(lenText)
+            print(lenText)
+            inlen = 16384
+            self.request.send(line.encode("utf-8"))
+            time.sleep(0.2)
             while line:
                 if inlen > len or lenText <= inlen:
                     self.request.send("next".encode("utf-8"))
+                    time.sleep(0.2)
                     break
                 else:
+                    #print(line)
+                    #line = base64.b64encode(line)#.encode("utf-8"))
+                    #print("text = ", line)
+                    time.sleep(0.2)
+                    line = file.read(16384)
+                    inlen += 16384
                     self.request.send(line.encode("utf-8"))
-                time.sleep(0.2)
-                line = file.read(1024)
-                inlen += 1024
-                #print(len, " -> " ,inlen)
+
             file.close()
 
     def DiffieHellman(self):
@@ -129,7 +134,6 @@ class Shannon(socketserver.BaseRequestHandler):
             if len(ans) == 128:
                 break
         return ans
-
 
 if __name__ == '__main__':
     HOST, PORT = "0.0.0.0", 1337
