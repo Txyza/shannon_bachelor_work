@@ -74,15 +74,19 @@ class Shannon(socketserver.BaseRequestHandler):
         data = ""
         for i in range(0,128):
             file = open("text/" + str(i) + ".txt", "w")
+            data = b""
             while True:
-                data = self.request.recv(40960).decode("utf-8")
-                #print(data)
-                if data == "next":
+                nextdata = self.request.recv(262144)
+                if nextdata == b"next":
+                    print(i, "  ", nextdata)
+                    data = data.decode()
                     break
                 else:
-                    file.write(data)
-                if not data:
+                    data += nextdata
+                if not nextdata:
                     break
+
+            file.write(data)
             file.close()
 
     def miller_rabin(self, n, s=50):

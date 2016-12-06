@@ -65,7 +65,7 @@ def sendMessage(server, text1):
         line = file.read(16384)
         inlen = 16384
         while line:
-            time.sleep(0.1)
+            time.sleep(0.2)
             server.send(line.encode("utf-8"))
             if(inlen > lenText): break
             time.sleep(0.2)
@@ -75,14 +75,34 @@ def sendMessage(server, text1):
         server.send("next".encode("utf-8"))
         time.sleep(0.5)
 
+
 def sendFiles(server):
     for text in range(0,128):
-        print(text)
         file = open("text/" + str(text)+ ".txt", "r")
         time.sleep(0.2)
-        line = file.read(10240)
+        line = file.read(131072)
         lenText = os.path.getsize("text/" + str(text) + ".txt")
-        print("size = ", lenText)
+        print(text, "  size = ", lenText)
+        inlen = 131072
+        line = line.encode()
+        server.send(line)
+        time.sleep(0.3)
+        while line:
+                # print(line)
+                # line = base64.b64encode(line)#.encode("utf-8"))
+                # print("text = ", line)
+                #print("yep")
+
+                line = file.read(131072)
+                inlen += 131072
+                line = line.encode()
+                server.send(line)
+                time.sleep(0.3)
+        if lenText <= inlen:
+            print(text, "  next")
+            server.send("next".encode())
+            time.sleep(0.3)
+        '''
         #inlen = 131072
         while line:
             #print(line)
@@ -93,6 +113,7 @@ def sendFiles(server):
             #print(lenText, " -> ", inlen)
         server.send("next".encode("utf-8"))
         time.sleep(0.5)
+        '''
         file.close()
 
 def deltext():
@@ -142,14 +163,15 @@ def xor(text1, text2):
     return ans
 
 if __name__ == '__main__':
-    '''         Получение с сервера тексты и xor     '''
-    HOST, PORT = "127.0.0.1", 1337
+    '''         Получение с сервера тексты и xor '''
+    HOST, PORT = "127.0.0.1", 1703
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((HOST, PORT))
     Z = generationKey(server)
     downloadFiles(server)
     server.close()
     '''            2 КЛИЕНТУ        '''
+    print("next".encode())
     HOST, PORT = "127.0.0.1", 1338
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((HOST, PORT))
