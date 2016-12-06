@@ -18,7 +18,6 @@ class Shannon(socketserver.BaseRequestHandler):
         self.Q = 0
         self.DiffieHellman()
         self.bits()
-
         #self.downloadFiles()
         self.sendFiles()
 
@@ -45,10 +44,10 @@ class Shannon(socketserver.BaseRequestHandler):
                     #print(line)
                     #line = base64.b64encode(line)#.encode("utf-8"))
                     #print("text = ", line)
-                    time.sleep(0.2)
                     line = file.read(262144)
                     inlen += 262144
                     self.request.send(line.encode("utf-8"))
+                    time.sleep(0.2)
 
             file.close()
 
@@ -136,6 +135,6 @@ class Shannon(socketserver.BaseRequestHandler):
         return ans
 
 if __name__ == '__main__':
-    HOST, PORT = "0.0.0.0", 1337
+    HOST, PORT = "0.0.0.0", 1703
     server = socketserver.TCPServer((HOST, PORT), Shannon)
     server.serve_forever()
