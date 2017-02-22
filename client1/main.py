@@ -18,8 +18,8 @@ class Shannon(socketserver.BaseRequestHandler):
         self.DiffieHellman()
         ans = self.bits()
         self.downloadMessage()
-        self.downloadFiles()
-        self.xorText(ans)
+        #self.downloadFiles()
+        self.xorMessage(ans)
 
     def DiffieHellman(self):
         self.Q = random.randint(0, (2 ** 128) - 1)
@@ -129,7 +129,7 @@ class Shannon(socketserver.BaseRequestHandler):
     def bit(self, num, pos):
         return (num & (1 << pos)) >> pos
 
-    def xorText(self, list):
+    def xorFile(self, list):
         file = open("1.txt", "r")
         text1 = file.read()
         text1 = base64.b64decode(text1).decode()
@@ -142,6 +142,15 @@ class Shannon(socketserver.BaseRequestHandler):
         file2 = open("message.txt", "w")
         file2.write(text1)
         file2.close()
+
+    def xorMessage(self, list, message):
+        for i in list:
+            if i == 1:
+                file2 = open("text/" + str(i) + ".txt", "r")
+                text2 = file2.read()
+                file2.close()
+                message = self.xor(message, text2)
+        return message
 
     def xor(self, text1, text2):
         lenText2 = len(text2)

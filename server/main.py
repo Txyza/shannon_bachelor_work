@@ -133,7 +133,8 @@ class Shannon(socketserver.BaseRequestHandler):
             if len(ans) == 128:
                 break
         return ans
-
+    def local(self):
+        pass
 if __name__ == '__main__':
     HOST, PORT = "0.0.0.0", 1703
     server = socketserver.TCPServer((HOST, PORT), Shannon)
