@@ -18,8 +18,9 @@ class Shannon(socketserver.BaseRequestHandler):
         self.Q = 0
         self.DiffieHellman()
         self.bits()
+
         #self.downloadFiles()
-        self.sendFiles()
+        #self.sendFiles()
 
     def sendFiles(self):
         time.sleep(0.2)
@@ -131,11 +132,37 @@ class Shannon(socketserver.BaseRequestHandler):
             if (list[select] in ans) == False:
                 ans.append(list[select])
             if len(ans) == 128:
-                break
-        return ans
+                return ans
+
+    '''Локальные функции для проведения тестов'''
     def local(self):
-        pass
+        list = self.selection()
+        ans = open("message.txt", "r")
+        for text in list:
+            ans = self.xor(ans,
+                     open("textCode/" + text, "r"))
+
+    def bits(self, n):
+        ans = []
+        for i in range(0, 128):
+            a = self.bit(n, i)
+            ans.append(a)
+
+    def xor(self, list, text1, text2):
+        lenText2 = len(text2)
+        j = 0; k = 0
+        ans = ""
+        list = bits(self.Zb)
+        for i in text1:
+            if(list[k] == 1):
+                ans += chr(ord(i) ^ (ord(text2[j])))
+                j += 1
+                if j == lenText2 - 1:
+                    j = 0
+        return ans
+    '''-----------------------------------'''
+
 if __name__ == '__main__':
-    HOST, PORT = "0.0.0.0", 1703
+    HOST, PORT = "0.0.0.0", 1337
     server = socketserver.TCPServer((HOST, PORT), Shannon)
     server.serve_forever()

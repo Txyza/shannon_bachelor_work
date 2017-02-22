@@ -161,15 +161,16 @@ def xor(text1, text2):
 
 if __name__ == '__main__':
     '''         Получение с сервера тексты и xor '''
-    HOST, PORT = "127.0.0.1", 1703
-    #HOST, PORT = "192.168.1.5", 1703
+    HOST, PORT = "127.0.0.1", 1337
+    #HOST, PORT = "192.168.1.5", 1337
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((HOST, PORT))
     Z = generationKey(server)
-    downloadFiles(server)
+    #downloadFiles(server)
     server.close()
 
     '''            2 КЛИЕНТУ        '''
+    '''
     print("next".encode())
     HOST, PORT = "127.0.0.1", 1338
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -181,3 +182,4 @@ if __name__ == '__main__':
     sendFiles(server)
     #deltext()
     server.close()
+    '''
