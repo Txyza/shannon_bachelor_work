@@ -11,6 +11,7 @@ import os
 import time
 import base64
 
+
 def generationKey(server):
     P = int(server.recv(1024).decode())
     G = int(server.recv(1024).decode())
@@ -139,6 +140,24 @@ def xorText(list):
     file.close()
     return text1
 
+def xorTest(list):
+    file = open("text/0.txt", "r")
+    text1 = file.read(5120)
+    #print(sum(list))
+    for i in range(1,128):
+        if list[i] == 1:
+            #print(i)
+            file2 = open("text/" + str(i) + ".txt", "r")
+            text2 = file2.read()
+            file2.close()
+            text1 = xor(text1, text2)
+            #print(i, ' -> ', len(text1))
+    file2.close()
+    file.close()
+    return text1
+
+#print(ord(b'в') ^ ord(b'г'))
+
 def xorMessage(list, message):
     for i in list:
         if i == 1:
@@ -150,17 +169,59 @@ def xorMessage(list, message):
 
 def xor(text1, text2):
     lenText2 = len(text2)
+    #print(len(text2))
     j = 0
-    ans = ""
+    ans = ''
     for i in text1:
+        #print(chr(i), ' ', chr(text2[j]), ' -> ', i, ' ', text2[j], ' -> ', i ^ text2[j], '  -> ', chr(i^text2[j]), ' -> ' , len(chr(i^text2[j])))
+        #try:
+        #ans += chr(i^text2[j])
+        #except:
+            #print(i)
+
+        #if ord(i) > 1103 or (ord(text2[j])) > 1103:
+        #    print(i, ' -> ', ord(i), ' ^ ', text2[j], ' -> ', ord(text2[j]))
+        #try:
         ans += chr(ord(i) ^ (ord(text2[j])))
+        #except:
+            #print(j, ' -> ', len(text2))
         j+=1
         if j == lenText2-1:
             j = 0
+        #a = input()
+    #a = input()
+    #print(ans)
     return ans
+
+
+
+
+SYMBOLTABLE = ""
+print(SYMBOLTABLE)
+print(ord('␧'))
+def move2front_encode(strng, symboltable):
+    sequence, pad = [], symboltable[::]
+    for char in strng:
+        try:
+            indx = pad.index(char)
+        except:
+            print(char)
+            return
+        sequence.append(indx)
+        pad = [pad.pop(indx)] + pad
+    return sequence
+
+def alf(text):
+    ans = [text[0]]
+    for i in text:
+        if ans.count(i) == 0:
+            ans.append(i)
+    return ans
+
 
 if __name__ == '__main__':
     '''         Получение с сервера тексты и xor '''
+    '''
     HOST, PORT = "127.0.0.1", 1337
     #HOST, PORT = "192.168.1.5", 1337
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -168,6 +229,7 @@ if __name__ == '__main__':
     Z = generationKey(server)
     #downloadFiles(server)
     server.close()
+    '''
 
     '''            2 КЛИЕНТУ        '''
     '''
@@ -183,3 +245,22 @@ if __name__ == '__main__':
     #deltext()
     server.close()
     '''
+    for i in range(0,1):
+        HOST, PORT = "127.0.0.1", 1337
+        # HOST, PORT = "192.168.1.5", 1337
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.connect((HOST, PORT))
+        Z = generationKey(server)
+        # downloadFiles(server)
+        server.close()
+        ans = bits(Z)
+        text1 = xorTest(ans)
+        SYMBOLTABLE = alf(text1)
+        SYMBOLTABLE.sort()
+        print(SYMBOLTABLE)
+        encode = move2front_encode(text1, SYMBOLTABLE)
+        print('%14r encodes to \n%r' % (text1, encode), end=', ')
+        print()
+        #text1 = xorTest(ans)
+
+        #print(text1)
