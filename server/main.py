@@ -17,7 +17,7 @@ class Shannon(socketserver.BaseRequestHandler):
         self.P = 0;        self.G = 0;        self.Zb = 0
         self.Q = 0
         self.DiffieHellman()
-        self.bits()
+        #self.bits()
 
         #self.downloadFiles()
         #self.sendFiles()
@@ -28,13 +28,13 @@ class Shannon(socketserver.BaseRequestHandler):
         list = self.selection()
         for text in list:
             print(text)
-            file = open("textCode/" + text, "r")
+            file = open("textCode/" + text, "r", encoding="latin-1")
             time.sleep(0.2)
             line = file.read(262144)
             lenText = os.path.getsize("textCode/"+text)
             print(lenText)
             inlen = 262144
-            self.request.send(line.encode("utf-8"))
+            self.request.send(line.encode("latin-1"))
             time.sleep(0.2)
             while line:
                 if inlen > len or lenText <= inlen:
@@ -47,7 +47,7 @@ class Shannon(socketserver.BaseRequestHandler):
                     #print("text = ", line)
                     line = file.read(262144)
                     inlen += 262144
-                    self.request.send(line.encode("utf-8"))
+                    self.request.send(line.encode("latin-1"))
                     time.sleep(0.2)
 
             file.close()
@@ -112,7 +112,7 @@ class Shannon(socketserver.BaseRequestHandler):
     def bits(self):
         n = self.Zb
         ans = []
-        for i in range(0,128):
+        for i in range(0, 128):
             a = self.bit(n, i)
             ans.append(a)
 

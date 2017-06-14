@@ -42,9 +42,9 @@ def downloadFiles(server):
     data = ""
     for i in range(0, 128):
         print(i)
-        file = open("text/"+str(i)+".txt", "w")
+        file = open("text/"+str(i)+".txt", "w", encoding="latin-1")
         while True:
-            data = server.recv(262144*2).decode("utf-8")
+            data = server.recv(262144*2).decode("latin-1")
             if data == "next":
                 break
             else:
@@ -105,11 +105,13 @@ def sendFiles(server):
             time.sleep(0.3)
         file.close()
 
+
 def deltext():
     list = os.listdir(path=".\\text")
     for text in list:
         os.remove("text\\"+text)
     return list
+
 
 def bits(n):
     ans = []
@@ -121,9 +123,11 @@ def bits(n):
         ans.append(a)
     return ans
 
+
 def bit(num, pos):
     return (num & (1 << pos)) >> pos
 
+"""
 def xorText(list):
     file = open("1.txt", "r")
     text1 = file.read()
@@ -139,33 +143,36 @@ def xorText(list):
     file2.close()
     file.close()
     return text1
+"""
 
 def xorTest(list):
-    file = open("text/0.txt", "r")
+    file = open("test0", "r", encoding="latin-1")
     text1 = file.read(5120)
+    print(text1)
     #print(sum(list))
-    for i in range(1,128):
+    for i in range(0,128):
         if list[i] == 1:
             #print(i)
-            file2 = open("text/" + str(i) + ".txt", "r")
+            file2 = open("text/" + str(i) + ".txt", "r", encoding="latin-1")
             text2 = file2.read()
             file2.close()
             text1 = xor(text1, text2)
+            print(i, ' -> ', text1)
             #print(i, ' -> ', len(text1))
     file2.close()
     file.close()
     return text1
 
-#print(ord(b'в') ^ ord(b'г'))
 
 def xorMessage(list, message):
-    for i in list:
-        if i == 1:
-            file2 = open("text/" + str(i) + ".txt", "r")
+    for i in range(0,128):
+        if list[i] == 1:
+            file2 = open("text/" + str(i) + ".txt", "r", encoding="latin-1")
             text2 = file2.read()
             file2.close()
             message = xor(message, text2)
     return message
+
 
 def xor(text1, text2):
     lenText2 = len(text2)
@@ -194,29 +201,9 @@ def xor(text1, text2):
     return ans
 
 
+def test():
 
-
-SYMBOLTABLE = ""
-print(SYMBOLTABLE)
-print(ord('␧'))
-def move2front_encode(strng, symboltable):
-    sequence, pad = [], symboltable[::]
-    for char in strng:
-        try:
-            indx = pad.index(char)
-        except:
-            print(char)
-            return
-        sequence.append(indx)
-        pad = [pad.pop(indx)] + pad
-    return sequence
-
-def alf(text):
-    ans = [text[0]]
-    for i in text:
-        if ans.count(i) == 0:
-            ans.append(i)
-    return ans
+    call = ['program', '1']
 
 
 if __name__ == '__main__':
@@ -245,7 +232,7 @@ if __name__ == '__main__':
     #deltext()
     server.close()
     '''
-    for i in range(0,1):
+    for i in range(0, 1):
         HOST, PORT = "127.0.0.1", 1337
         # HOST, PORT = "192.168.1.5", 1337
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -255,12 +242,13 @@ if __name__ == '__main__':
         server.close()
         ans = bits(Z)
         text1 = xorTest(ans)
-        SYMBOLTABLE = alf(text1)
-        SYMBOLTABLE.sort()
-        print(SYMBOLTABLE)
-        encode = move2front_encode(text1, SYMBOLTABLE)
-        print('%14r encodes to \n%r' % (text1, encode), end=', ')
-        print()
-        #text1 = xorTest(ans)
+        file = open('1.d', 'w', encoding="latin-1")
+        for text in text1:
+            try:
+                file.write(text)
+            except:
+                pass
+        file.close()
+        text1 = xorMessage(ans, text1)
 
-        #print(text1)
+        print(text1)

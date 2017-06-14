@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # ==============
 #      Date: 04.12.2016
 #       Author: Chusovitin Anton Romanovich
@@ -16,13 +14,15 @@ def rename():
         newName.update(name.encode())
         os.rename("text/"+name, "textCode/"+newName.hexdigest()+".txt")
 
+
 def delsimbol():
-    for name in os.listdir("../client2/text/"):
+    for name in os.listdir("textCode/"):
         print(name)
-        file = open("../client2/text/{}".format(name), "r")
+        file = open("textCode/{}".format(name), "r", encoding="latin-1")
         TEXT = file.read()
+        #print(TEXT)
         file.close()
-        file = open("../client2/text/{}".format(name), "w")
+        file = open("textCode/{}".format(name), "w", encoding="latin-1")
         a1 = ""
         for text in TEXT:
             if ord(text) < 1104:
@@ -33,5 +33,5 @@ def delsimbol():
         file.close()
 
 if __name__ == '__main__':
-    #rename()
+    rename()
     delsimbol()

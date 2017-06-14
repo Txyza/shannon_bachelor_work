@@ -11,9 +11,10 @@ import wget
 import os
 from pyunpack import Archive
 
+
 def req():      # Рекурсивный обход сайта
     site = "http://www.knigitxt.com/"
-    for i in range(1, 31):
+    for i in range(8, 31):
         print(i)
         data = requests.get("http://www.knigitxt.com/authors/all/"+str(i))
         authors = re.findall("/author/\d{1,5}", data.text)
