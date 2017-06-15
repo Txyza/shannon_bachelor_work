@@ -22,7 +22,7 @@ def delsimbol():
         TEXT = file.read()
         #print(TEXT)
         file.close()
-        file = open("textCode/{}".format(name), "w", encoding="latin-1")
+        file = open("textCode/{}".format(name), "w", encoding="utf-8")
         a1 = ""
         for text in TEXT:
             if ord(text) < 1104:
@@ -34,4 +34,4 @@ def delsimbol():
 
 if __name__ == '__main__':
     rename()
-    delsimbol()
+    #delsimbol()

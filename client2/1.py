@@ -1,0 +1,6 @@
+file = open('files/1.jpg', 'rb')
+f = file.read()
+file.close()
+file = open('files/2.jpg', 'wb')
+file.write(f)
+file.close()

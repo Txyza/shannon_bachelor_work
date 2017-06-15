@@ -145,60 +145,92 @@ def xorText(list):
     return text1
 """
 
-def xorTest(list):
-    file = open("test0", "r", encoding="latin-1")
-    text1 = file.read(5120)
-    print(text1)
-    #print(sum(list))
-    for i in range(0,128):
+def xorTest(text1, list):
+    #text1 = text1.decode()
+    #print(text1)
+    fl = 0
+    #text1 = text1.split()
+    for i in range(0, 128):
         if list[i] == 1:
-            #print(i)
-            file2 = open("text/" + str(i) + ".txt", "r", encoding="latin-1")
+            file2 = open("text/" + str(i) + ".txt", "rb")
             text2 = file2.read()
             file2.close()
-            text1 = xor(text1, text2)
-            print(i, ' -> ', text1)
-            #print(i, ' -> ', len(text1))
-    file2.close()
-    file.close()
-    return text1
+            #print(text1)
+            #a = input()
+            #print(text1)
+            print(len(text1))
+            if fl == 0:
+                text1 = xor(text1, text2)
+                fl = 1
+            else:
+                text1 = xor2(text1, text2)
+                #print(i, ' -> ', text1)
+    return ''.join(text1)
 
 
 def xorMessage(list, message):
-    for i in range(0,128):
+    fl = 0
+    for i in range(0, 128):
         if list[i] == 1:
-            file2 = open("text/" + str(i) + ".txt", "r", encoding="latin-1")
+            file2 = open("text/" + str(i) + ".txt", "rb")
             text2 = file2.read()
             file2.close()
-            message = xor(message, text2)
+            if fl == 0:
+                message = xor(message, text2)
+                fl = 1
+            else:
+                message = xor2(message, text2)
     return message
 
 
 def xor(text1, text2):
+    #print('yes')
     lenText2 = len(text2)
-    #print(len(text2))
     j = 0
-    ans = ''
-    for i in text1:
-        #print(chr(i), ' ', chr(text2[j]), ' -> ', i, ' ', text2[j], ' -> ', i ^ text2[j], '  -> ', chr(i^text2[j]), ' -> ' , len(chr(i^text2[j])))
-        #try:
-        #ans += chr(i^text2[j])
-        #except:
-            #print(i)
-
-        #if ord(i) > 1103 or (ord(text2[j])) > 1103:
-        #    print(i, ' -> ', ord(i), ' ^ ', text2[j], ' -> ', ord(text2[j]))
-        #try:
-        ans += chr(ord(i) ^ (ord(text2[j])))
-        #except:
-            #print(j, ' -> ', len(text2))
+    ans = []
+    for i in range(len(text1)):
+    #for i in text1:
+        #print('i -> {}'.format(i))
+        #print('text2[j] -> {}'.format(text2[j]))
+        #print(i, ' -> ', text2[j])
+        #print(chr(i ^ text2[j]))
+        #qwe = input()
+        ans.append(chr(text1[i] ^ text2[j]))
+        #ans.append(chr(i ^ text2[j]))
+        #print(ans)
+        #ans += chr(ord(i) ^ (ord(text2[j])))
         j+=1
         if j == lenText2-1:
             j = 0
-        #a = input()
-    #a = input()
     #print(ans)
+    #a = input()
+
     return ans
+
+
+def xor2(text1, text2):
+    #print('yes')
+    lenText2 = len(text2)
+    j = 0
+    ans = []
+    for i in range(len(text1)):
+    #for i in text1:
+        #print('i -> {}'.format(i))
+        #print('text2[j] -> {}'.format(text2[j]))
+        #print(i, ' -> ', text2[j])
+        #print(chr(i ^ text2[j]))
+        #qwe = input()
+        text1[i] = chr(ord(text1[i]) ^ text2[j])
+        #ans.append(chr(i ^ text2[j]))
+        #print(ans)
+        #ans += chr(ord(i) ^ (ord(text2[j])))
+        j+=1
+        if j == lenText2-1:
+            j = 0
+    #print(ans)
+    #a = input()
+
+    return text1
 
 
 def test():
@@ -232,23 +264,35 @@ if __name__ == '__main__':
     #deltext()
     server.close()
     '''
-    for i in range(0, 1):
+    for i in range(12, 100):
         HOST, PORT = "127.0.0.1", 1337
-        # HOST, PORT = "192.168.1.5", 1337
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect((HOST, PORT))
         Z = generationKey(server)
+        ans = bits(Z)
+        with open('test/statistic.txt', 'a') as f:
+            f.write('{}\n'.format(sum(ans)))
         # downloadFiles(server)
         server.close()
-        ans = bits(Z)
-        text1 = xorTest(ans)
-        file = open('1.d', 'w', encoding="latin-1")
-        for text in text1:
-            try:
-                file.write(text)
-            except:
-                pass
-        file.close()
-        text1 = xorMessage(ans, text1)
-
-        print(text1)
+        for name in os.listdir("files/"):
+            with open("files/{0}".format(name), "rb") as f:
+                text_message = f.read()
+            print(text_message)
+            #print(text_message[:10])
+            #sl = text_message[:10]
+            #text_message = text_message[11::]
+            text1 = xorTest(text_message, ans)
+            with open('test/{0}_{1}.txt'.format(i, name), 'wb') as f:
+                for text in text1:
+                    f.write(text.encode())
+                print("{}_{} encode success".format(i, name))
+            with open('test/{0}_{1}.txt'.format(i, name), 'rb') as f:
+                for text in text1:
+                    text1 = f.read()
+            text1 = xorMessage(ans, text1)
+            with open('success/{0}_{1}'.format(i, name), 'wb') as f:
+                #f.write(sl)
+                for text in text1:
+                    f.write(text.encode())
+                print("{}_{} decode success".format(i, name))
+            #print(text1)

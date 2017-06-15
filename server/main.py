@@ -20,7 +20,7 @@ class Shannon(socketserver.BaseRequestHandler):
         #self.bits()
 
         #self.downloadFiles()
-        #self.sendFiles()
+        self.sendFiles()
 
     def sendFiles(self):
         time.sleep(0.2)
