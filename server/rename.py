@@ -6,6 +6,7 @@
 
 import os
 import hashlib
+import random
 
 def rename():
 
@@ -32,6 +33,16 @@ def delsimbol():
         file.write(a1)
         file.close()
 
+
+def delete_space():
+    for name in os.listdir("textCode/"):
+        with open("textCode/{}".format(name), "rb") as f:
+            text = bytearray(f.read())
+        with open("textCode/{}".format(name), "wb") as f:
+            f.write(text[100::])
+
+
 if __name__ == '__main__':
-    rename()
+    #rename()
     #delsimbol()
+    delete_space()

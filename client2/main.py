@@ -237,7 +237,7 @@ if __name__ == '__main__':
     #deltext()
     server.close()
     '''
-    for i in range(12, 100):
+    for i in range(1, 100):
         HOST, PORT = "127.0.0.1", 1337
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect((HOST, PORT))
@@ -250,21 +250,22 @@ if __name__ == '__main__':
         for name in os.listdir("files/"):
             with open("files/{0}".format(name), "rb") as f:
                 text_message = bytearray(f.read())
-
             # Шифрование исходного
             text1 = xorTest(text_message, ans)
             with open('test/{0}_{1}.txt'.format(i, name), 'wb') as f:
-                for text in text1:
-                    f.write(text.encode())
+                #print(text1)
+                #for text in text1:
+                f.write(text1)
                 print("{}_{} encode success".format(i, name))
             with open('test/{0}_{1}.txt'.format(i, name), 'rb') as f:
-                for text in text1:
-                    text1 = bytearray(f.read())
+                #for text in text1:
+                text1 = bytearray(f.read())
             # Шифрование шифртекста
             text1 = xorMessage(ans, text1)
             with open('success/{0}_{1}'.format(i, name), 'wb') as f:
                 #f.write(sl)
-                for text in text1:
-                    f.write(text.encode())
+                f.write(text1)
+                #for text in text1:
+                #    f.write(text)
                 print("{}_{} decode success".format(i, name))
             #print(text1)

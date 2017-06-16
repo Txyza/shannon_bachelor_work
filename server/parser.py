@@ -14,7 +14,7 @@ from pyunpack import Archive
 
 def req():      # Рекурсивный обход сайта
     site = "http://www.knigitxt.com/"
-    for i in range(12, 31):
+    for i in range(7, 31):
         print(i)
         try:
             data = requests.get("http://www.knigitxt.com/authors/all/"+str(i))
