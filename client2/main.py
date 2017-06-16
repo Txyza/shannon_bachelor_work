@@ -153,19 +153,10 @@ def xorTest(text1, list):
     for i in range(0, 128):
         if list[i] == 1:
             file2 = open("text/" + str(i) + ".txt", "rb")
-            text2 = file2.read()
+            text2 = bytearray(file2.read())
             file2.close()
-            #print(text1)
-            #a = input()
-            #print(text1)
-            print(len(text1))
-            if fl == 0:
-                text1 = xor(text1, text2)
-                fl = 1
-            else:
-                text1 = xor2(text1, text2)
-                #print(i, ' -> ', text1)
-    return ''.join(text1)
+            text1 = xor(text1, text2)
+    return text1
 
 
 def xorMessage(list, message):
@@ -173,39 +164,21 @@ def xorMessage(list, message):
     for i in range(0, 128):
         if list[i] == 1:
             file2 = open("text/" + str(i) + ".txt", "rb")
-            text2 = file2.read()
+            text2 = bytearray(file2.read())
             file2.close()
-            if fl == 0:
-                message = xor(message, text2)
-                fl = 1
-            else:
-                message = xor2(message, text2)
+            message = xor(message, text2)
     return message
 
 
 def xor(text1, text2):
-    #print('yes')
     lenText2 = len(text2)
     j = 0
-    ans = []
     for i in range(len(text1)):
-    #for i in text1:
-        #print('i -> {}'.format(i))
-        #print('text2[j] -> {}'.format(text2[j]))
-        #print(i, ' -> ', text2[j])
-        #print(chr(i ^ text2[j]))
-        #qwe = input()
-        ans.append(chr(text1[i] ^ text2[j]))
-        #ans.append(chr(i ^ text2[j]))
-        #print(ans)
-        #ans += chr(ord(i) ^ (ord(text2[j])))
-        j+=1
+        text1[i] = text1[i] ^ text2[j]
+        j += 1
         if j == lenText2-1:
             j = 0
-    #print(ans)
-    #a = input()
-
-    return ans
+    return text1
 
 
 def xor2(text1, text2):
@@ -272,15 +245,13 @@ if __name__ == '__main__':
         ans = bits(Z)
         with open('test/statistic.txt', 'a') as f:
             f.write('{}\n'.format(sum(ans)))
-        # downloadFiles(server)
+        downloadFiles(server)
         server.close()
         for name in os.listdir("files/"):
             with open("files/{0}".format(name), "rb") as f:
-                text_message = f.read()
-            print(text_message)
-            #print(text_message[:10])
-            #sl = text_message[:10]
-            #text_message = text_message[11::]
+                text_message = bytearray(f.read())
+
+            # Шифрование исходного
             text1 = xorTest(text_message, ans)
             with open('test/{0}_{1}.txt'.format(i, name), 'wb') as f:
                 for text in text1:
@@ -288,7 +259,8 @@ if __name__ == '__main__':
                 print("{}_{} encode success".format(i, name))
             with open('test/{0}_{1}.txt'.format(i, name), 'rb') as f:
                 for text in text1:
-                    text1 = f.read()
+                    text1 = bytearray(f.read())
+            # Шифрование шифртекста
             text1 = xorMessage(ans, text1)
             with open('success/{0}_{1}'.format(i, name), 'wb') as f:
                 #f.write(sl)

@@ -1,3 +1,5 @@
-pip install wget
-pip install patool
-pip install pyunpack
+wget
+patool
+pyunpack
+
+плавикс 75

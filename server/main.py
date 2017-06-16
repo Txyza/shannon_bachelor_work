@@ -11,6 +11,7 @@ import time
 import os
 import base64
 
+
 class Shannon(socketserver.BaseRequestHandler):
 
     def handle(self):
