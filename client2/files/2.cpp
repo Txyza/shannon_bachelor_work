@@ -1,9 +1,6 @@
 #include <iostream>
-
 using namespace std;
-
 int main(){
-
-	cout << "Hello world\nand Anton\n";
+cout << "Hello world\nand Anton\n";
 return 0;
 }

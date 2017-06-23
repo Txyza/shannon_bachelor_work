@@ -9,7 +9,6 @@ import socketserver
 import random
 import time
 import os
-import base64
 
 
 class Shannon(socketserver.BaseRequestHandler):
@@ -21,7 +20,7 @@ class Shannon(socketserver.BaseRequestHandler):
         #self.bits()
 
         #self.downloadFiles()
-        self.sendFiles()
+        self.sendFiles2()
 
     def sendFiles(self):
         time.sleep(0.2)
@@ -50,8 +49,17 @@ class Shannon(socketserver.BaseRequestHandler):
                     inlen += 262144
                     self.request.send(line.encode("latin-1"))
                     time.sleep(0.2)
-
             file.close()
+
+
+    def sendFiles2(self):
+        #time.sleep(0.2)
+        #len = int(self.request.recv(512).decode("utf-8"))   # Прием необходимой длинны текста
+        list = self.selection()
+        for text in list:
+            time.sleep(0.2)
+            self.request.send(text.encode())
+
 
     def DiffieHellman(self):
         self.Q = random.randint(0, (2 ** 128) - 1)
@@ -129,41 +137,14 @@ class Shannon(socketserver.BaseRequestHandler):
         lenList = len(list)
         ans = []
         while 1:
-            select = random.randint(0,lenList-1)
+            select = random.randint(0, lenList-1)
             if (list[select] in ans) == False:
                 ans.append(list[select])
             if len(ans) == 128:
                 return ans
 
-    '''Локальные функции для проведения тестов'''
-    def local(self):
-        list = self.selection()
-        ans = open("message.txt", "r")
-        for text in list:
-            ans = self.xor(ans,
-                     open("textCode/" + text, "r"))
-
-    def bits(self, n):
-        ans = []
-        for i in range(0, 128):
-            a = self.bit(n, i)
-            ans.append(a)
-
-    def xor(self, list, text1, text2):
-        lenText2 = len(text2)
-        j = 0; k = 0
-        ans = ""
-        list = bits(self.Zb)
-        for i in text1:
-            if(list[k] == 1):
-                ans += chr(ord(i) ^ (ord(text2[j])))
-                j += 1
-                if j == lenText2 - 1:
-                    j = 0
-        return ans
-    '''-----------------------------------'''
-
 if __name__ == '__main__':
+    #HOST, PORT = "0.0.0.0", 1337
     HOST, PORT = "0.0.0.0", 1337
     server = socketserver.TCPServer((HOST, PORT), Shannon)
     server.serve_forever()

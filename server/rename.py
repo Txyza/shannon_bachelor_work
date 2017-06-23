@@ -39,10 +39,32 @@ def delete_space():
         with open("textCode/{}".format(name), "rb") as f:
             text = bytearray(f.read())
         with open("textCode/{}".format(name), "wb") as f:
-            f.write(text[100::])
+            f.write(text[300::])
+
+
+def generation():
+    for i in range(1, 301):
+        s = bytearray(random.randint(0, 255) for j in range(0, 200000))
+        with open('backups/generation/{}'.format(i), 'wb') as f:
+            f.write(s)
+            print('write {}'.format(i))
+
+
+def del_size():
+    for name in os.listdir("textCode/"):
+       if os.path.getsize('textCode/{}'.format(name)) < 100000:
+           os.remove('textCode/{}'.format(name))
 
 
 if __name__ == '__main__':
-    #rename()
-    #delsimbol()
-    delete_space()
+    a = input('Input')
+    if a == '1':
+        rename()
+        delete_space()
+        del_size()
+    elif a == '2':
+        delete_space()
+    elif a == '3':
+        generation()
+    elif a == '4':
+        del_size()
