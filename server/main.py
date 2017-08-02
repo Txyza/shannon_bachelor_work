@@ -9,7 +9,7 @@ import socketserver
 import random
 import time
 import os
-import base64
+
 
 class Shannon(socketserver.BaseRequestHandler):
 
@@ -17,9 +17,10 @@ class Shannon(socketserver.BaseRequestHandler):
         self.P = 0;        self.G = 0;        self.Zb = 0
         self.Q = 0
         self.DiffieHellman()
-        self.bits()
+        #self.bits()
+
         #self.downloadFiles()
-        self.sendFiles()
+        self.sendFiles2()
 
     def sendFiles(self):
         time.sleep(0.2)
@@ -27,13 +28,13 @@ class Shannon(socketserver.BaseRequestHandler):
         list = self.selection()
         for text in list:
             print(text)
-            file = open("textCode/" + text, "r")
+            file = open("textCode/" + text, "r", encoding="latin-1")
             time.sleep(0.2)
             line = file.read(262144)
             lenText = os.path.getsize("textCode/"+text)
             print(lenText)
             inlen = 262144
-            self.request.send(line.encode("utf-8"))
+            self.request.send(line.encode("latin-1"))
             time.sleep(0.2)
             while line:
                 if inlen > len or lenText <= inlen:
@@ -46,10 +47,19 @@ class Shannon(socketserver.BaseRequestHandler):
                     #print("text = ", line)
                     line = file.read(262144)
                     inlen += 262144
-                    self.request.send(line.encode("utf-8"))
+                    self.request.send(line.encode("latin-1"))
                     time.sleep(0.2)
-
             file.close()
+
+
+    def sendFiles2(self):
+        #time.sleep(0.2)
+        #len = int(self.request.recv(512).decode("utf-8"))   # Прием необходимой длинны текста
+        list = self.selection()
+        for text in list:
+            time.sleep(0.2)
+            self.request.send(text.encode())
+
 
     def DiffieHellman(self):
         self.Q = random.randint(0, (2 ** 128) - 1)
@@ -111,7 +121,7 @@ class Shannon(socketserver.BaseRequestHandler):
     def bits(self):
         n = self.Zb
         ans = []
-        for i in range(0,128):
+        for i in range(0, 128):
             a = self.bit(n, i)
             ans.append(a)
 
@@ -127,14 +137,14 @@ class Shannon(socketserver.BaseRequestHandler):
         lenList = len(list)
         ans = []
         while 1:
-            select = random.randint(0,lenList-1)
+            select = random.randint(0, lenList-1)
             if (list[select] in ans) == False:
                 ans.append(list[select])
             if len(ans) == 128:
-                break
-        return ans
+                return ans
 
 if __name__ == '__main__':
-    HOST, PORT = "0.0.0.0", 1703
+    #HOST, PORT = "0.0.0.0", 1337
+    HOST, PORT = "0.0.0.0", 1337
     server = socketserver.TCPServer((HOST, PORT), Shannon)
     server.serve_forever()

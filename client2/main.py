@@ -11,6 +11,7 @@ import os
 import time
 import base64
 
+
 def generationKey(server):
     P = int(server.recv(1024).decode())
     G = int(server.recv(1024).decode())
@@ -35,26 +36,25 @@ def powmod(a, step, mod):
         a = (a * a) % mod
     return b % mod
 
-def downloadFiles(server):
+def downloadFiles(server, raund):
     time.sleep(1)
     server.send("210450".encode("utf-8"))                   # Необходимая длина шифр-текста
     data = ""
     for i in range(0, 128):
         print(i)
-        file = open("text/"+str(i)+".txt", "w")
+        file2 = open("raunds/{}/{}.txt".format(raund, i), 'w')
+        file = open("text/"+str(i)+".txt", "w", encoding="latin-1")
         while True:
-            data = server.recv(262144*2).decode("utf-8")
+            data = server.recv(262144*2).decode("latin-1")
             if data == "next":
                 break
             else:
-                #print(data)
-                #data = base64.b64decode(data)
-                #print(data.decode())
+                file2.write(data)
                 file.write(data)
             if not data:
                 break
+        file2.close()
         file.close()
-        #print(data)
 
 def sendMessage(server, text1):
     time.sleep(1)
@@ -102,25 +102,15 @@ def sendFiles(server):
             print(text, "  next")
             server.send("next".encode())
             time.sleep(0.3)
-        '''
-        #inlen = 131072
-        while line:
-            #print(line)
-            server.send(line.encode("utf-8"))
-            time.sleep(0.5)
-            line = file.read(10240)
-            #inlen += 131072
-            #print(lenText, " -> ", inlen)
-        server.send("next".encode("utf-8"))
-        time.sleep(0.5)
-        '''
         file.close()
+
 
 def deltext():
     list = os.listdir(path=".\\text")
     for text in list:
         os.remove("text\\"+text)
     return list
+
 
 def bits(n):
     ans = []
@@ -132,9 +122,11 @@ def bits(n):
         ans.append(a)
     return ans
 
+
 def bit(num, pos):
     return (num & (1 << pos)) >> pos
 
+"""
 def xorText(list):
     file = open("1.txt", "r")
     text1 = file.read()
@@ -150,27 +142,67 @@ def xorText(list):
     file2.close()
     file.close()
     return text1
+"""
+
+def xorTest(text1, list):
+    #text1 = text1.decode()
+    #print(text1)
+    fl = 0
+    #text1 = text1.split()
+
+    for i in range(0, 128):
+        if list[i] == 1:
+            fl += 1
+            file2 = open("text/" + str(i) + ".txt", "rb")
+            text2 = bytearray(file2.read())
+            file2.close()
+            text1 = xor(text1, text2)
+            if fl == 55:
+                break
+    return text1
+
+
+def xorMessage(list, message):
+    fl = 0
+    for i in range(0, 128):
+        if list[i] == 1:
+            file2 = open("text/" + str(i) + ".txt", "rb")
+            text2 = bytearray(file2.read())
+            file2.close()
+            message = xor(message, text2)
+    return message
+
 
 def xor(text1, text2):
     lenText2 = len(text2)
     j = 0
-    ans = ""
-    for i in text1:
-        ans += chr(ord(i) ^ (ord(text2[j])))
-        j+=1
+    for i in range(len(text1)):
+        text1[i] = text1[i] ^ text2[j]
+        j += 1
         if j == lenText2-1:
             j = 0
-    return ans
+    return text1
+
+
+def dow(server, raund):
+    data = ""
+    for i in range(0, 128):
+        print(i)
+        file2 = open("raunds/{}/{}.txt".format(raund, i), 'wb')
+        file = open("text/" + str(i) + ".txt", "wb")
+        data = server.recv(1024).decode()
+        with open('../server/textCode/{}'.format(data), 'rb') as f:
+            f.seek(random.randint(500, 80000))
+            data = f.read(402401)
+            file2.write(data)
+            file.write(data)
+        file2.close()
+        file.close()
+
 
 if __name__ == '__main__':
-    '''         Получение с сервера тексты и xor '''
-    HOST, PORT = "127.0.0.1", 1703
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.connect((HOST, PORT))
-    Z = generationKey(server)
-    downloadFiles(server)
-    server.close()
     '''            2 КЛИЕНТУ        '''
+    '''
     print("next".encode())
     HOST, PORT = "127.0.0.1", 1338
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -182,3 +214,50 @@ if __name__ == '__main__':
     sendFiles(server)
     #deltext()
     server.close()
+    '''
+    for i in range(0, 300):
+        HOST, PORT = "127.0.0.1", 1337
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.connect((HOST, PORT))
+        Z = generationKey(server)
+        list_bits = bits(Z)
+        os.mkdir("raunds/{}".format(i))
+        with open('test/statistic.txt', 'a') as f:
+            f.write('{}\n'.format(sum(list_bits)))
+        with open('raunds/{}/stat.txt'.format(i), 'w') as f:
+            ch = 0
+            for b in list_bits:
+                if b == 1:
+                    f.write('{} '.format(ch))
+                ch += 1
+        clock1 = time.time()
+        dow(server, i)
+        #downloadFiles(server, i)
+        clock2 = time.time()
+        with open('time_download', 'a') as f:
+            f.write('{}) {}\n'.format(i, clock2 - clock1))
+        server.close()
+        for name in os.listdir("files/"):
+            with open("files/{0}".format(name), "rb") as f:
+                text_message = bytearray(f.read())
+            # Шифрование исходного
+            clock1 = time.time()
+            text1 = xorTest(text_message, list_bits)
+            clock2 = time.time()
+            with open('time_xor', 'a') as f:
+                f.write('{}) {} -> {}\n'.format(i, name, clock2-clock1))
+            with open('test/{0}_{1}'.format(i, name), 'wb') as f:
+                f.write(text1)
+                print("{}_{} encode success".format(i, name))
+            with open('test/{0}_{1}'.format(i, name), 'rb') as f:
+                #for text in text1:
+                text1 = bytearray(f.read())
+            # Шифрование шифртекста
+            #text1 = xorTest(text1, list_bits)
+            #with open('success/{0}_{1}'.format(i, name), 'wb') as f:
+                #f.write(sl)
+            #    f.write(text1)
+                #for text in text1:
+                #    f.write(text)
+            #    print("{}_{} decode success".format(i, name))
+            #print(text1)
