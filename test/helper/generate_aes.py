@@ -7,7 +7,7 @@ from random import choice
 re_text = ascii_uppercase+ascii_lowercase+digits
 print(re_text)
 
-for i in range(59):
+for i in range(10000):
     data = ''.join(choice(re_text) for _ in range(736))
     with open('key\{}'.format(''.join(choice(re_text) for _ in range(32))), 'wb') as out_file:
         recipient_key = RSA.import_key(

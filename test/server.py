@@ -1,5 +1,5 @@
 import socket
-from Lab1.mqv.dh import *
+from .dh import *
 from gmpy2 import *
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = '0.0.0.0'

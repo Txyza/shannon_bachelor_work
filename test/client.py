@@ -1,5 +1,5 @@
 import socket
-from Lab1.mqv.dh import *
+from .dh import *
 from gmpy2 import *
 
 conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
