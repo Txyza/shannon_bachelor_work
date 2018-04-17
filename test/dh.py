@@ -97,7 +97,7 @@ def xor(answer, text):
 
 
 def encode_file(code_key):
-    file_code = 'test2'
+    file_code = 'test1'
     res_file = open('1%s' % file_code, 'wb')
     with open(file_code, 'rb') as f:
         while True:
@@ -111,7 +111,7 @@ def encode_file(code_key):
 
 
 def decode_file(code_key):
-    file_code = '1test2'
+    file_code = '1test1'
     res_file = open('2%s' % file_code, 'wb')
     with open(file_code, 'rb') as f:
         while True:
@@ -122,6 +122,7 @@ def decode_file(code_key):
             text = xor(text, code_key)
             res_file.write(text)
     res_file.close()
+
 
 if __name__ == "__main__":
     p, b, q = generate_p_b_q()
