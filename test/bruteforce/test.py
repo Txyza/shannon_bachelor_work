@@ -11,9 +11,9 @@ def double_files(files):
     data, double_keys = [], []
     for first in range(len(files)):
         for second in range(first + 1, len(files)):
-            with open(r"..\..\helper\text\%s" % first, 'r') as f:
+            with open("%s" % first, 'r') as f:
                 data.append(bytearray(f.read()))
-            with open(r"..\..\helper\text\%s" % second, 'r') as f:
+            with open("%s" % second, 'r') as f:
                 data.append(bytearray(f.read()))
             double_keys.append(xor(data[0], data[1]))
     return double_keys
@@ -22,7 +22,7 @@ def double_files(files):
 def single_files(files):
     single_key = []
     for file in files:
-        with open(r"..\..\helper\text\%s" % file, 'r') as f:
+        with open("%s" % file, 'r') as f:
             single_key.append(bytearray(f.read()))
     return single_key
 

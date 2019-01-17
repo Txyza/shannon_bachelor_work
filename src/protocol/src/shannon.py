@@ -11,7 +11,7 @@ class Shannon:
         # Список файлов отобранных для сессии
         self.files = set()
         # путь до директории text
-        self.helper_dir = '..\\..\\..\\helper'
+        self.helper_dir = '..\\..\\helper'
         # Ключ шифрования
         self.key = ''
 
