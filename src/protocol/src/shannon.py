@@ -99,7 +99,7 @@ class Shannon:
         text = bytearray(text.encode())
         self._selection(124124)
         self._make_code_key()
-        return self._message_with_key(text)
+        return self._message_with_key(text), self.files, self.files_code
 
     def decode(self, text):
         """
@@ -108,7 +108,7 @@ class Shannon:
         :return:
         """
         text = bytearray(text)
-        return self._message_with_key(text)
+        return self._message_with_key(text), self.files, self.files_code
 
 '''
 input_text = 'hello world'

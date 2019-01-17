@@ -1,8 +1,8 @@
-import src.protocol.src.shannon as sh
+from .src.shannon import Shannon
 
 
 def run(input_text):
-    s = sh.Shannon()
+    s = Shannon()
     text = s.encode(input_text)
     print('')
     text = s.decode(text)
@@ -10,6 +10,3 @@ def run(input_text):
     output_text = 'ooo'
     return output_text
 
-
-if __name__ == '__main__':
-    run('hello world')
