@@ -1,3 +1,6 @@
+from src.protocol.src.shannon import Shannon
+
+
 def xor(answer, text):
     for i in range(len(answer)):
         answer[i] = answer[i] ^ text[i % 1024]
@@ -32,9 +35,10 @@ def get_result(mode, session, cipher, supposed_key, input_data):
 
 
 def run_test(input_data):
-    input_data = bytearray(input_data)
     for session in range(1000):
-        cipher, files, keys = some_function(input_data)
+        cipher, files, keys = Shannon().encode(input_data)
+        input_data = bytearray(input_data.encode())
+        print(keys)
         for supposed_key in single_files(files):
             get_result('single', session, cipher, supposed_key, input_data)
         for supposed_key in double_files(files):
