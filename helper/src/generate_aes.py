@@ -7,11 +7,11 @@ from random import choice
 re_text = ascii_uppercase+ascii_lowercase+digits
 print(re_text)
 
-for i in range(10000):
+for i in range(1, 5000):
     data = ''.join(choice(re_text) for _ in range(736))
-    with open('key\{}'.format(''.join(choice(re_text) for _ in range(32))), 'wb') as out_file:
+    with open('..\\text\\{}'.format(i), 'wb') as out_file:
         recipient_key = RSA.import_key(
-            open('my_rsa_public.pem').read()
+            open('key\\my_rsa_public.pem').read()
         )
         session_key = get_random_bytes(32)
 
