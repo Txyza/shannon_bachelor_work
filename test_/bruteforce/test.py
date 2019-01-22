@@ -1,4 +1,5 @@
 from src.protocol.src.shannon import Shannon
+from test.book.check import BookStack
 
 
 def xor(answer, text):
@@ -27,19 +28,21 @@ def single_files(files):
     return single_key
 
 
-def get_result(mode, session, cipher, supposed_key, input_data):
+def get_result(mode, session, supposed_key, input_data):
     xor_result = xor(input_data, supposed_key)
-    check_result = check_function(cipher, xor_result)
+    check_result = BookStack().check(xor_result)
     with open(r"log_test\%s\session_%s" % (mode, session), 'a') as f:
         f.write(check_result)
 
 
 def run_test(input_data):
-    for session in range(1000):
+    for session in range(5):
         cipher, files, keys = Shannon().encode(input_data)
         input_data = bytearray(input_data.encode())
         print(keys)
         for supposed_key in single_files(files):
-            get_result('single', session, cipher, supposed_key, input_data)
+            get_result('single', session, supposed_key, input_data)
         for supposed_key in double_files(files):
-            get_result('double', session, cipher, supposed_key, input_data)
+            get_result('double', session, supposed_key, input_data)
+
+run_test('1234567')
