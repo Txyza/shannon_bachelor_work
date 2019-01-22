@@ -4,7 +4,7 @@ import subprocess
 class BookStack:
     def __init__(self):
         # Файл теста
-        self.file_test = 'test'
+        self.file_test = r'../book/test'
         # конфигурации ХИ-квадрат
         self.Q05 = 3.84146
         self.Q9 = 0.01579
@@ -24,8 +24,8 @@ class BookStack:
         Метод вызывает процесс bs.exe для тестирования
         :return:
         """
-        call = ['./bs.exe', '-f',
-                self.file_test,
+        call = ['../book/bs.exe', '-f',
+                'test',
                 '-w', '8', '-u', '128', '-q']
         data = subprocess.check_output(call).decode()
         return data
