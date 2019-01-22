@@ -222,7 +222,7 @@ if __name__ == '__main__':
         Z = generationKey(server)
         list_bits = bits(Z)
         os.mkdir("raunds/{}".format(i))
-        with open('test/statistic.txt', 'a') as f:
+        with open('test_/statistic.txt', 'a') as f:
             f.write('{}\n'.format(sum(list_bits)))
         with open('raunds/{}/stat.txt'.format(i), 'w') as f:
             ch = 0
@@ -246,10 +246,10 @@ if __name__ == '__main__':
             clock2 = time.time()
             with open('time_xor', 'a') as f:
                 f.write('{}) {} -> {}\n'.format(i, name, clock2-clock1))
-            with open('test/{0}_{1}'.format(i, name), 'wb') as f:
+            with open('test_/{0}_{1}'.format(i, name), 'wb') as f:
                 f.write(text1)
                 print("{}_{} encode success".format(i, name))
-            with open('test/{0}_{1}'.format(i, name), 'rb') as f:
+            with open('test_/{0}_{1}'.format(i, name), 'rb') as f:
                 #for text in text1:
                 text1 = bytearray(f.read())
             # Шифрование шифртекста

@@ -4,7 +4,7 @@ from re import findall
 
 
 def result_book_stack():
-    for name in os.listdir("test/"):
+    for name in os.listdir("test_/"):
         #print(name)
         if name.find('jpg') != -1:
             f = open('result_test/result_jpg', 'a')
@@ -23,7 +23,7 @@ def result_book_stack():
         else:
             f = open('result_test/result_bin', 'a')
         call = ['./bs', '-f',
-                'test/{}'.format(name),
+                'test_/{}'.format(name),
                 '-w', '8', '-u', '128', '-q']
         data = subprocess.check_output(call)
         f.write('{} = {}'.format(name, data.decode()))
