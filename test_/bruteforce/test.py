@@ -1,48 +1,108 @@
+import sys
 from src.protocol.src.shannon import Shannon
 from test_.book.check import BookStack
 
 
-def xor(answer, text):
-    for i in range(len(answer)):
-        answer[i] = answer[i] ^ text[i % 1024]
-    return answer
+class Bruteforce:
+
+    def __init__(self):
+        # Количество сессий тестирования
+        self.count_session = 1
+        # количество файлов для тестирования
+        self.count_files = 1
+        # Выбранные файлы сессии
+        self.files = None
+        # Файлы ключей сессии используемые для шифрования
+        self.keys = None
+        # Файл для результата тестирования
+        self.test_file = 'brute_file'
+
+    @staticmethod
+    def xor(answer, text):
+        for i in range(len(answer)):
+            answer[i] = answer[i] ^ text[i % 1024]
+        return answer
+
+    def double_files(self, files):
+        data, double_keys = [], []
+        for first in range(1, len(files)+1):
+            for second in range(first + 1, len(files)+1):
+                with open(r"../../helper/text/%s" % first, 'rb') as f:
+                    data.append(bytearray(f.read()))
+                with open(r"../../helper/text/%s" % second, 'rb') as f:
+                    data.append(bytearray(f.read()))
+                double_keys.append(self.xor(data[0], data[1]))
+        return double_keys
+
+    def single_files(self, files):
+        single_key = []
+        for file in files:
+            with open(r"../../helper/text/%s" % file, 'rb') as f:
+                single_key.append(bytearray(f.read()))
+        return single_key
+
+    def _code_text(self, text, code):
+        if isinstance(text, bytes):
+            text = bytearray(text)
+        return self.xor(text, code)
+
+    def _code_file(self, file_in, file_out, exploit):
+        with open('%s\\..\\..\\helper\\text\\%s' % (sys.path[0], exploit), 'rb') as file_exploit:
+            text_exploit = bytearray(file_exploit.read())
+            with open('%s\\%s' % (sys.path[0], self.test_file), 'wb') as file_result:
+                with open('%s' % (file_out), 'rb') as file_code:
+                    while True:
+                        text = file_code.read(1024)
+                        if text == b'':
+                            break
+                        text = self._code_text(text, text_exploit)
+                        file_result.write(text)
+
+    def _switch(self, text, file_in=None, file_out=None, exploit=None):
+        text_out = None
+        if file_in and file_out and exploit:
+            text_out = self._code_file(file_in, file_out, exploit)
+        elif text and exploit and isinstance(exploit, str):
+            text_out = self._code_text(text, exploit)
+        return text_out
+
+    def get_result(self, mode, session, supposed_key, input_data):
+        xor_result = self.xor(input_data, supposed_key)
+        check_result = BookStack().check(xor_result)
+        with open(r"log_test/%s/session_%s" % (mode, session), 'a') as f:
+            f.write('%s\n' % str(check_result[1]))
+
+    def _brute(self, text, file_in, file_out):
+        for exploit in self.files:
+            self._switch(text, file_in, file_out, exploit)
+            self._check_result()
+
+    def _check_result(self):
+        check_result = BookStack().check(file=self.test_file)
+        print(check_result)
+
+    def test(self, text, file_in=None, file_out=None):
+        """
+        Метод для запуска теста брутфорса
+        :param text:
+        :param file_in:
+        :param file_out:
+        :return:
+        """
+        if text:
+            text = bytearray(text.encode())
+        for session in range(self.count_session):
+            cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+            self._brute(text, file_in, file_out)
+            # for supposed_key in self.single_files(files):
+            #     self.get_result('single', session, supposed_key, text)
+            # for supposed_key in self.double_files(files):
+            #     self.get_result('double', session, supposed_key, text)
 
 
-def double_files(files):
-    data, double_keys = [], []
-    for first in range(1, len(files)+1):
-        for second in range(first + 1, len(files)+1):
-            with open(r"../../helper/text/%s" % first, 'rb') as f:
-                data.append(bytearray(f.read()))
-            with open(r"../../helper/text/%s" % second, 'rb') as f:
-                data.append(bytearray(f.read()))
-            double_keys.append(xor(data[0], data[1]))
-    return double_keys
+if __name__ == '__main__':
+    text = None
+    file_in = '%s\\test1' % sys.path[0]
+    file_out = '%s\\test_result' % sys.path[0]
+    Bruteforce().test(text, file_in, file_out)
 
-
-def single_files(files):
-    single_key = []
-    for file in files:
-        with open(r"../../helper/text/%s" % file, 'rb') as f:
-            single_key.append(bytearray(f.read()))
-    return single_key
-
-
-def get_result(mode, session, supposed_key, input_data):
-    xor_result = xor(input_data, supposed_key)
-    check_result = BookStack().check(xor_result)
-    with open(r"log_test/%s/session_%s" % (mode, session), 'a') as f:
-        f.write('%s\n' % str(check_result[1]))
-
-
-def run_test(input_data):
-    for session in range(5):
-        cipher, files, keys = Shannon().encode(input_data)
-        input_data = bytearray(input_data.encode())
-        for supposed_key in single_files(files):
-            get_result('single', session, supposed_key, input_data)
-        for supposed_key in double_files(files):
-            get_result('double', session, supposed_key, input_data)
-
-
-run_test('1234567')
