@@ -8,6 +8,8 @@ class Bruteforce:
     def __init__(self):
         # Количество сессий тестирования
         self.count_session = 1
+        # Номер сессии
+        self.session = None
         # количество файлов для тестирования
         self.count_files = 1
         # Выбранные файлы сессии
@@ -66,20 +68,25 @@ class Bruteforce:
             text_out = self._code_text(text, exploit)
         return text_out
 
-    def get_result(self, mode, session, supposed_key, input_data):
-        xor_result = self.xor(input_data, supposed_key)
-        check_result = BookStack().check(xor_result)
-        with open(r"log_test/%s/session_%s" % (mode, session), 'a') as f:
-            f.write('%s\n' % str(check_result[1]))
+    def get_result(self, mode, check_status):
+        with open(r"log_test/%s/session_%s" % (mode, self.session), 'a') as f:
+            f.write('%s\n' % str(check_status))
 
     def _brute(self, text, file_in, file_out):
         for exploit in self.files:
+            print('-' * 30)
+            print('Взлом файлом номер "%s"' % exploit)
             self._switch(text, file_in, file_out, exploit)
             self._check_result()
 
     def _check_result(self):
         check_result = BookStack().check(file=self.test_file)
-        print(check_result)
+        print('Тестирование завершено, результат: ', check_result)
+        if check_result[1]:
+            print('Последовательность случайна')
+        else:
+            print('Последовательность неслучайна')
+        self.get_result('single', check_result[1])
 
     def test(self, text, file_in=None, file_out=None):
         """
@@ -92,8 +99,12 @@ class Bruteforce:
         if text:
             text = bytearray(text.encode())
         for session in range(self.count_session):
+            self.session = session
+            print('-' * 30)
+            print('Запуск сессии "%d"' % session)
             cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
             self._brute(text, file_in, file_out)
+            print('Окончание сессии "%d"' % session)
             # for supposed_key in self.single_files(files):
             #     self.get_result('single', session, supposed_key, text)
             # for supposed_key in self.double_files(files):
@@ -102,7 +113,7 @@ class Bruteforce:
 
 if __name__ == '__main__':
     text = None
-    file_in = '%s\\test1' % sys.path[0]
+    file_in = '%s\\test2' % sys.path[0]
     file_out = '%s\\test_result' % sys.path[0]
     Bruteforce().test(text, file_in, file_out)
 
