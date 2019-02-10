@@ -90,25 +90,57 @@ class Shannon:
                 code = f.read(1024)
         return text
 
-    def encode(self, text=''):
+    def _code_text(self, text):
+        if isinstance(text, bytes):
+            text = bytearray(text)
+        return self._message_with_key(text)
+
+    @staticmethod
+    def _open_file(file, mode='rb'):
+        if isinstance(file, str):
+            file = open(file, mode)
+        return file
+
+    def _code_file(self, file_in, file_out):
+        file_in = self._open_file(file_in)
+        file_out = self._open_file(file_out, 'wb')
+        while True:
+            text = file_in.read(1024)
+            if text == b'':
+                break
+            text = self._code_text(text)
+            file_out.write(text)
+
+    def _switch(self, text, file_in=None, file_out=None):
+        text_out = None
+        if file_in and file_out:
+            text_out = self._code_file(file_in, file_out), self.files, self.files_code
+        elif text:
+            text_out = self._code_text(text), self.files, self.files_code
+        return text_out
+
+    def encode(self, text='', file_in=None, file_out=None):
         """
         Метод шифрует строку
         :param text:
+        :param file_in:
+        :param file_out:
         :return:
         """
-        text = bytearray(text.encode())
         self._selection(124124)
         self._make_code_key()
-        return self._message_with_key(text), self.files, self.files_code
+        return self._switch(text, file_in, file_out)
 
-    def decode(self, text):
+    def decode(self, text, file_in=None, file_out=None):
         """
         Метод расшифровывает строку
         :param text:
+        :param file_in:
+        :param file_out:
         :return:
         """
-        text = bytearray(text)
-        return self._message_with_key(text), self.files, self.files_code
+        return self._switch(text, file_in, file_out)
+
 
 '''
 input_text = 'hello world'

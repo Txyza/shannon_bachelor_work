@@ -5,6 +5,8 @@ class BookStack:
     def __init__(self):
         # Файл теста
         self.file_test = r'../book/test'
+        # входной файл
+        self.file = None
         # конфигурации ХИ-квадрат
         self.Q05 = 3.84146
         self.Q9 = 0.01579
@@ -25,7 +27,7 @@ class BookStack:
         :return:
         """
         call = ['../book/bs.exe', '-f',
-                'test',
+                self.file or 'test',
                 '-w', '8', '-u', '128', '-q']
         data = subprocess.check_output(call).decode()
         return data
@@ -42,21 +44,26 @@ class BookStack:
         else:
             return text, False
 
-    def _check(self, text):
+    def _check(self, text=None, file=None):
         """
         Метод запускает процесс тестирования
         :param text:
+        :param file:
         :return:
         """
-        self._write_file(text)
+        if not file:
+            self._write_file(text)
+        else:
+            self.file = file
         result = self._call()
         return self._hi(text, result)
 
-    def check(self, text):
+    def check(self, text=None, file=None):
         """
         Метод принимает на вход строку, которую необходимо протестировать
         на выход возвращается результат тестирования
         :param text:
+        :param file:
         :return:
         """
-        return self._check(text)
+        return self._check(text, file)
