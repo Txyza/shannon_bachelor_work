@@ -1,4 +1,6 @@
 import sys
+from random import choice
+from string import ascii_lowercase
 from src.protocol.src.shannon import Shannon
 from test_.book.check import BookStack
 
@@ -7,7 +9,7 @@ class Bruteforce:
 
     def __init__(self):
         # Количество сессий тестирования
-        self.count_session = 1
+        self.count_session = 100
         # Номер сессии
         self.session = None
         # количество файлов для тестирования
@@ -18,6 +20,8 @@ class Bruteforce:
         self.keys = None
         # Файл для результата тестирования
         self.test_file = 'brute_file'
+        # Название выходного файла
+        self.out_file_name = ''
 
     @staticmethod
     def xor(answer, text):
@@ -68,25 +72,44 @@ class Bruteforce:
             text_out = self._code_text(text, exploit)
         return text_out
 
-    def get_result(self, mode, check_status):
-        with open(r"log_test/%s/session_%s" % (mode, self.session), 'a') as f:
-            f.write('%s\n' % str(check_status))
+    def get_result(self, mode, check_status, exploit, info=None):
+        with open(r"log_test/%s/session_%s_%s" % (mode, self.out_file_name, self.session), 'a') as f:
+            if info:
+                f.write('Тест: {}\n'.format(info))
+            if not check_status:
+                f.write('%s %s %s\n' % (str(check_status), str(exploit), str('..\\..\\helper\\text\\'+exploit in self.keys)))
+            else:
+                f.write('%s\n' % str(check_status))
 
     def _brute(self, text, file_in, file_out):
         for exploit in self.files:
             print('-' * 30)
             print('Взлом файлом номер "%s"' % exploit)
+            if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
+                print('Файл входит в последовательность, которой шифровали')
+            else:
+                print('Файл не входит в последовательность, которой шифровали')
             self._switch(text, file_in, file_out, exploit)
-            self._check_result()
+            self._check_result(exploit)
 
-    def _check_result(self):
+    def _check_result(self, exploit):
+        """
+        Метод запускает N раз тестирование последовательности, для получения точного результата
+        :param exploit:
+        :return:
+        """
         check_result = BookStack().check(file=self.test_file)
         print('Тестирование завершено, результат: ', check_result)
         if check_result[1]:
             print('Последовательность случайна')
         else:
             print('Последовательность неслучайна')
-        self.get_result('single', check_result[1])
+        info = None
+        if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
+            info = 'Файл {} входит в последовательность, которой шифровали'.format(exploit)
+        else:
+            info = 'Файл {} не входит в последовательность, которой шифровали'.format(exploit)
+        self.get_result('single', check_result[1], exploit, info)
 
     def test(self, text, file_in=None, file_out=None):
         """
@@ -102,7 +125,10 @@ class Bruteforce:
             self.session = session
             print('-' * 30)
             print('Запуск сессии "%d"' % session)
+            self.out_file_name = file_out.split('\\')[-1]
             cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+            with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
+                f.write('\n\nЗапуск сессии {}\n'.format(session))
             self._brute(text, file_in, file_out)
             print('Окончание сессии "%d"' % session)
             # for supposed_key in self.single_files(files):
@@ -114,6 +140,7 @@ class Bruteforce:
 if __name__ == '__main__':
     text = None
     file_in = '%s\\test2' % sys.path[0]
-    file_out = '%s\\test_result' % sys.path[0]
+    out_name = ''.join([choice(ascii_lowercase) for i in range(10)])
+    file_out = '%s\\%s' % (sys.path[0], out_name)
     Bruteforce().test(text, file_in, file_out)
 
