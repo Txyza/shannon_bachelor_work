@@ -114,7 +114,7 @@ class Shannon:
 
     def _switch(self, text, file_in=None, file_out=None):
         text_out = None
-        if file_in:
+        if file_in and not file_out:
             text_out = self._code_file(file_in), self.files, self.files_code
         elif file_in and file_out:
             text_out = self._code_file(file_in, file_out), self.files, self.files_code
