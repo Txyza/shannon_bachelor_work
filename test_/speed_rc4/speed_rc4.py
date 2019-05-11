@@ -1,14 +1,20 @@
 from helper.src.rc4 import encrypt
 from src.protocol.src.shannon import Shannon
-import time as t
+from string import ascii_lowercase, ascii_uppercase, digits
+from random import choice
+from time import perf_counter
 
 # Название тестируемого файла
-file_in = 'test1'
+file_in = 'test2'
+
+alphabet = ascii_uppercase + ascii_lowercase + digits
+key = ''.join([choice(alphabet) for _ in range(10000)])
 
 
 def encode_file_rc4():
     global file_in
-    key = 'Very long and confidential key' * 100
+    global key
+    # key = 'Very long and confidential key' * 100
     with open(file_in, 'rb') as f:
         while True:
             text = f.read()
@@ -24,10 +30,10 @@ def encode_file_shannon():
 
 def time_code(func, d):
     res = None
-    start = t.perf_counter()
+    start = perf_counter()
     for i in range(1):
         res = func()
-    end = t.perf_counter()
+    end = perf_counter()
     print(d, ' ->  %.8f' % ((end - start) / 1))
     return res
 
