@@ -126,6 +126,7 @@ class Bruteforce:
             print('-' * 30)
             print('Запуск сессии "%d"' % session)
             self.out_file_name = file_out.split('\\')[-1]
+            self.test_file = 'test_%s' % self.out_file_name
             cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
             with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
                 f.write('\n\nЗапуск сессии {}\n'.format(session))
