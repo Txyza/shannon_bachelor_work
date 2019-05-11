@@ -7,7 +7,7 @@ class Bruteforce:
 
     def __init__(self):
         # Количество сессий тестирования
-        self.count_session = 1
+        self.count_session = 100
         # Номер сессии
         self.session = None
         # количество файлов для тестирования
@@ -68,25 +68,28 @@ class Bruteforce:
             text_out = self._code_text(text, exploit)
         return text_out
 
-    def get_result(self, mode, check_status):
+    def get_result(self, mode, check_status, exploit):
         with open(r"log_test/%s/session_%s" % (mode, self.session), 'a') as f:
-            f.write('%s\n' % str(check_status))
+            if not check_status:
+                f.write('%s %s %s\n' % (str(check_status), str(exploit), str('..\\..\\helper\\text\\'+exploit in self.keys)))
+            else:
+                f.write('%s\n' % str(check_status))
 
     def _brute(self, text, file_in, file_out):
         for exploit in self.files:
             print('-' * 30)
             print('Взлом файлом номер "%s"' % exploit)
             self._switch(text, file_in, file_out, exploit)
-            self._check_result()
+            self._check_result(exploit)
 
-    def _check_result(self):
+    def _check_result(self, exploit):
         check_result = BookStack().check(file=self.test_file)
         print('Тестирование завершено, результат: ', check_result)
         if check_result[1]:
             print('Последовательность случайна')
         else:
             print('Последовательность неслучайна')
-        self.get_result('single', check_result[1])
+        self.get_result('single', check_result[1], exploit)
 
     def test(self, text, file_in=None, file_out=None):
         """
