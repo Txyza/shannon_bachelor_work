@@ -101,19 +101,22 @@ class Shannon:
             file = open(file, mode)
         return file
 
-    def _code_file(self, file_in, file_out):
+    def _code_file(self, file_in, file_out=None):
         file_in = self._open_file(file_in)
-        file_out = self._open_file(file_out, 'wb')
+        file_out = self._open_file(file_out, 'wb') if file_out else None
         while True:
             text = file_in.read(1024)
             if text == b'':
                 break
             text = self._code_text(text)
-            file_out.write(text)
+            if file_out:
+                file_out.write(text)
 
     def _switch(self, text, file_in=None, file_out=None):
         text_out = None
-        if file_in and file_out:
+        if file_in:
+            text_out = self._code_file(file_in), self.files, self.files_code
+        elif file_in and file_out:
             text_out = self._code_file(file_in, file_out), self.files, self.files_code
         elif text:
             text_out = self._code_text(text), self.files, self.files_code
