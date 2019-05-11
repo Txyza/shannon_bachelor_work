@@ -22,6 +22,8 @@ class Bruteforce:
         self.test_file = 'brute_file'
         # Название выходного файла
         self.out_file_name = ''
+        # Количество тестов стопка книг
+        self.N = 1
 
     @staticmethod
     def xor(answer, text):
@@ -98,18 +100,19 @@ class Bruteforce:
         :param exploit:
         :return:
         """
-        check_result = BookStack().check(file=self.test_file)
-        print('Тестирование завершено, результат: ', check_result)
-        if check_result[1]:
-            print('Последовательность случайна')
-        else:
-            print('Последовательность неслучайна')
-        info = None
-        if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
-            info = 'Файл {} входит в последовательность, которой шифровали'.format(exploit)
-        else:
-            info = 'Файл {} не входит в последовательность, которой шифровали'.format(exploit)
-        self.get_result('single', check_result[1], exploit, info)
+        for i in range(self.N):
+            check_result = BookStack().check(file=self.test_file)
+            print('Тестирование завершено, результат: ', check_result)
+            if check_result[1]:
+                print('Последовательность случайна')
+            else:
+                print('Последовательность неслучайна')
+            info = None
+            if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
+                info = 'Файл {} входит в последовательность, которой шифровали'.format(exploit)
+            else:
+                info = 'Файл {} не входит в последовательность, которой шифровали'.format(exploit)
+            self.get_result('single', check_result[1], exploit, info)
 
     def test(self, text, file_in=None, file_out=None):
         """
