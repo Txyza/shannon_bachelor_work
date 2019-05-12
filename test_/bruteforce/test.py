@@ -28,7 +28,7 @@ class Bruteforce:
     @staticmethod
     def xor(answer, text):
         for i in range(len(answer)):
-            answer[i] = answer[i] ^ text[i % 1024]
+            answer[i] = answer[i] ^ text[i % 1009]
         return answer
 
     def double_files(self, files):
@@ -129,7 +129,7 @@ class Bruteforce:
             print('-' * 30)
             print('Запуск сессии "%d"' % session)
             self.out_file_name = file_out.split('\\')[-1]
-            self.test_file = 'test_%s' % self.out_file_name
+            self.test_file = 'temp\\test_%s' % self.out_file_name
             cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
             with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
                 f.write('\n\nЗапуск сессии {}\n'.format(session))
@@ -143,8 +143,8 @@ class Bruteforce:
 
 if __name__ == '__main__':
     text = None
-    file_in = '%s\\test2' % sys.path[0]
+    file_in = '%s\\test3' % sys.path[0]
     out_name = ''.join([choice(ascii_lowercase) for i in range(10)])
-    file_out = '%s\\%s' % (sys.path[0], out_name)
+    file_out = '%s\\temp\\%s' % (sys.path[0], out_name)
     Bruteforce().test(text, file_in, file_out)
 

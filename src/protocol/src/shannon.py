@@ -44,7 +44,7 @@ class Shannon:
         :return:
         """
         seed(private_key)
-        count_files = randint(50, 101)
+        count_files = randint(10, 21)
         self.files_code = set()
         while len(self.files_code) < count_files:
             self.files_code.add("%s\\text\\%s" % (self.helper_dir, choice(self.files)))
@@ -58,7 +58,7 @@ class Shannon:
         :return:
         """
         for index in range(len(text)):
-            text[index] = text[index] ^ code[index % 1024]
+            text[index] = text[index] ^ code[index % 1009]
         return text
 
     def _make_code_key(self):
@@ -130,7 +130,7 @@ class Shannon:
         :param file_out:
         :return:
         """
-        self._selection(124124)
+        self._selection(randint(2**512, 2**1024))
         self._make_code_key()
         return self._switch(text, file_in, file_out)
 
