@@ -111,7 +111,7 @@ class Bruteforce:
         else:
             f.write('%s\n' % str(check_status))
 
-    def _brute_all(self, text, file_in, file_out, session=1):
+    def _brute_all(self, text, file_in, file_out, count=4, session=1):
         """
         Методя для перебора всех файлов, входящих в список файлов сессии
         :param text:
@@ -124,18 +124,18 @@ class Bruteforce:
         print('Запуск сессии "%d"' % session)
         self.out_file_name = file_out.split('\\')[-1]
         self.test_file = 'temp\\test_%s' % self.out_file_name
-        cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
-        with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
+        cipher, self.files, self.keys = Shannon(count).encode(text, file_in, file_out)
+        with open(r"log_test/%s/session_%s_%s_keys_%d" % ('single', self.out_file_name, self.session, count), 'a') as f:
             f.write('\n\nЗапуск сессии {}\n'.format(session))
-        for exploit in self.files:
-            print('-' * 30)
-            print('Взлом файлом номер "%s"' % exploit)
-            if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
-                print('Файл входит в последовательность, которой шифровали')
-            else:
-                print('Файл не входит в последовательность, которой шифровали')
-            self._switch(text, file_in, file_out, exploit)
-            self._check_result(exploit, 'single')
+            for exploit in self.files:
+                print('-' * 30)
+                print('Взлом файлом номер "%s"' % exploit)
+                if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
+                    print('Файл входит в последовательность, которой шифровали')
+                else:
+                    print('Файл не входит в последовательность, которой шифровали')
+                self._switch(text, file_in, file_out, exploit)
+                self._check_result(exploit, 'single', f)
 
     def _brute_key_file(self, text, file_in, file_out, session=1):
         """
@@ -221,7 +221,8 @@ class Bruteforce:
             # cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
             # with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
             #     f.write('\n\nЗапуск сессии {}\n'.format(session))
-            self._brute_keys_files(text, file_in, file_out, 4, session)
+            self._brute_all(text, file_in, file_out, 4, session)
+            # self._brute_keys_files(text, file_in, file_out, 4, session)
             print('Окончание сессии "%d"' % session)
 
 
