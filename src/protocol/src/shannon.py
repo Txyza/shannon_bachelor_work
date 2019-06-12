@@ -58,7 +58,7 @@ class Shannon:
         :return:
         """
         for index in range(len(text)):
-            text[index] = text[index] ^ code[index % 1009]
+            text[index] = text[index] ^ code[index % len(code)]
         return text
 
     def _make_code_key(self):
