@@ -26,4 +26,6 @@ for key in result.keys():
     not_keys_file[key] = len([_ for _ in result[key] if _[-5:] == 'False'])
     # Сколько тестов было взломано файлами из списка ключей
     keys_file[key] = len([_ for _ in result[key] if _[-4:] == 'True' and len(_) > 4])
-    print(key, trues[key], lens[key], lens[key] / 100, trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
+    # print(key, trues[key], lens[key], lens[key] / 100,
+    # trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
+    print(key, trues[key], lens[key], trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
