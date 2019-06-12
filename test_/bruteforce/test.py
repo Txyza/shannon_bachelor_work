@@ -3,7 +3,7 @@ from random import choice
 from string import ascii_lowercase
 from src.protocol.src.shannon import Shannon
 from test_.book.check import BookStack
-
+from itertools import combinations
 
 class Bruteforce:
 
@@ -27,8 +27,9 @@ class Bruteforce:
 
     @staticmethod
     def xor(answer, text):
-        for i in range(len(answer)):
-            answer[i] = answer[i] ^ text[i % 1009]
+        if text:
+            for i in range(len(answer)):
+                answer[i] = answer[i] ^ text[i % len(text)]
         return answer
 
     def double_files(self, files):
@@ -42,7 +43,8 @@ class Bruteforce:
                 double_keys.append(self.xor(data[0], data[1]))
         return double_keys
 
-    def single_files(self, files):
+    @staticmethod
+    def single_files(files):
         single_key = []
         for file in files:
             with open(r"../../helper/text/%s" % file, 'rb') as f:
@@ -54,36 +56,77 @@ class Bruteforce:
             text = bytearray(text)
         return self.xor(text, code)
 
+    def _make_key(self, exploit):
+        """
+        Метод из множества ключей формирует выходной ключ
+        :param exploit:
+        :return:
+        """
+        new_key = bytearray()
+        for key in exploit:
+            with open('%s\\..\\..\\helper\\text\\%s' % (sys.path[0], key), 'rb') as file_exploit:
+                text_exploit = bytearray(file_exploit.read())
+                new_key = self._code_text(text_exploit, new_key)
+        return new_key
+
+    def _make_exploit(self, exploit):
+        """
+        Метод формирует из множества ключей шифр последовательность
+        :param exploit:
+        :return:
+        """
+        if isinstance(exploit, str):
+            exploit = [exploit]
+        return self._make_key(exploit)
+
     def _code_file(self, file_in, file_out, exploit):
-        with open('%s\\..\\..\\helper\\text\\%s' % (sys.path[0], exploit), 'rb') as file_exploit:
-            text_exploit = bytearray(file_exploit.read())
-            with open('%s\\%s' % (sys.path[0], self.test_file), 'wb') as file_result:
-                with open('%s' % (file_out), 'rb') as file_code:
-                    while True:
-                        text = file_code.read(1024)
-                        if text == b'':
-                            break
-                        text = self._code_text(text, text_exploit)
-                        file_result.write(text)
+        text_exploit = self._make_exploit(exploit)
+        with open('%s\\%s' % (sys.path[0], self.test_file), 'wb') as file_result:
+            with open('%s' % file_out, 'rb') as file_code:
+                while True:
+                    text = file_code.read(1024)
+                    if text == b'':
+                        break
+                    text = self._code_text(text, text_exploit)
+                    file_result.write(text)
 
     def _switch(self, text, file_in=None, file_out=None, exploit=None):
         text_out = None
         if file_in and file_out and exploit:
-            text_out = self._code_file(file_in, file_out, exploit)
+            self._code_file(file_in, file_out, exploit)
         elif text and exploit and isinstance(exploit, str):
             text_out = self._code_text(text, exploit)
         return text_out
 
-    def get_result(self, mode, check_status, exploit, info=None):
-        with open(r"log_test/%s/session_%s_%s" % (mode, self.out_file_name, self.session), 'a') as f:
-            if info:
-                f.write('Тест: {}\n'.format(info))
-            if not check_status:
-                f.write('%s %s %s\n' % (str(check_status), str(exploit), str('..\\..\\helper\\text\\'+exploit in self.keys)))
-            else:
-                f.write('%s\n' % str(check_status))
+    def get_result(self, mode, check_status, exploit, info=None, file_in=None):
+        f = file_in or open(r"log_test/%s/session_%s_%s" % (mode, self.out_file_name, self.session), 'a')
+        if info:
+            f.write('Тест: {}\n'.format(info))
+        if not check_status:
+            f.write('%s %s\n' % (
+                str(check_status),
+                str(exploit)
+                # str('..\\..\\helper\\text\\'+exploit in self.keys)
+            ))
+        else:
+            f.write('%s\n' % str(check_status))
 
-    def _brute(self, text, file_in, file_out):
+    def _brute_all(self, text, file_in, file_out, session=1):
+        """
+        Методя для перебора всех файлов, входящих в список файлов сессии
+        :param text:
+        :param file_in:
+        :param file_out:
+        :return:
+        """
+        self.session = session
+        print('-' * 30)
+        print('Запуск сессии "%d"' % session)
+        self.out_file_name = file_out.split('\\')[-1]
+        self.test_file = 'temp\\test_%s' % self.out_file_name
+        cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+        with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
+            f.write('\n\nЗапуск сессии {}\n'.format(session))
         for exploit in self.files:
             print('-' * 30)
             print('Взлом файлом номер "%s"' % exploit)
@@ -92,9 +135,53 @@ class Bruteforce:
             else:
                 print('Файл не входит в последовательность, которой шифровали')
             self._switch(text, file_in, file_out, exploit)
-            self._check_result(exploit)
+            self._check_result(exploit, 'single')
 
-    def _check_result(self, exploit):
+    def _brute_key_file(self, text, file_in, file_out, session=1):
+        """
+        Метод для перебора файлов, входящих в список ключей
+        :param text:
+        :param file_in:
+        :param file_out:
+        :return:
+        """
+        self.session = session
+        print('-' * 30)
+        print('Запуск сессии "%d"' % session)
+        self.out_file_name = file_out.split('\\')[-1]
+        self.test_file = 'temp\\test_%s' % self.out_file_name
+        cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+        with open(r"log_test/%s/session_%s_%s" % ('key', self.out_file_name, self.session), 'a') as f:
+            f.write('\n\nЗапуск сессии {}\n'.format(session))
+        for exploit in self.keys:
+            print('-' * 30)
+            print('Взлом ключевым файлом "%s"' % exploit)
+            self._switch(text, file_in, file_out, exploit)
+            self._check_result(exploit, 'key')
+
+    def _brute_keys_files(self, text, file_in, file_out, count=1, session=1):
+        """
+        Метод для перебора нескольких файлов, входящих в список ключей
+        :param text:
+        :param file_in:
+        :param file_out:
+        :return:
+        """
+        self.session = session
+        print('-' * 30)
+        print('Запуск сессии "%d"' % session)
+        self.out_file_name = file_out.split('\\')[-1]
+        self.test_file = 'temp\\test_%s' % self.out_file_name
+        cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+        with open(r"log_test/%s/session_%s_%s_key_%d" % ('keys', self.out_file_name, self.session, count), 'a') as f:
+            f.write('\n\nЗапуск сессии {}\n'.format(session))
+            for exploit in combinations(self.keys, count):
+                print('-' * 30)
+                print('Взлом набором ключевых файлов "%s"' % str(exploit))
+                self._switch(text, file_in, file_out, exploit)
+                self._check_result(exploit, 'keys', f)
+
+    def _check_result(self, exploit, path='single', file_in=None):
         """
         Метод запускает N раз тестирование последовательности, для получения точного результата
         :param exploit:
@@ -108,11 +195,12 @@ class Bruteforce:
             else:
                 print('Последовательность неслучайна')
             info = None
-            if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
-                info = 'Файл {} входит в последовательность, которой шифровали'.format(exploit)
-            else:
-                info = 'Файл {} не входит в последовательность, которой шифровали'.format(exploit)
-            self.get_result('single', check_result[1], exploit, info)
+            if isinstance(exploit, str):
+                if '..\\..\\helper\\text\\{}'.format(exploit) in self.keys:
+                    info = 'Файл {} входит в последовательность, которой шифровали'.format(exploit)
+                else:
+                    info = 'Файл {} не входит в последовательность, которой шифровали'.format(exploit)
+            self.get_result(path, check_result[1], exploit, info, file_in)
 
     def test(self, text, file_in=None, file_out=None):
         """
@@ -128,23 +216,18 @@ class Bruteforce:
             self.session = session
             print('-' * 30)
             print('Запуск сессии "%d"' % session)
-            self.out_file_name = file_out.split('\\')[-1]
-            self.test_file = 'temp\\test_%s' % self.out_file_name
-            cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
-            with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
-                f.write('\n\nЗапуск сессии {}\n'.format(session))
-            self._brute(text, file_in, file_out)
+            # self.out_file_name = file_out.split('\\')[-1]
+            # self.test_file = 'temp\\test_%s' % self.out_file_name
+            # cipher, self.files, self.keys = Shannon().encode(text, file_in, file_out)
+            # with open(r"log_test/%s/session_%s_%s" % ('single', self.out_file_name, self.session), 'a') as f:
+            #     f.write('\n\nЗапуск сессии {}\n'.format(session))
+            self._brute_keys_files(text, file_in, file_out, 4, session)
             print('Окончание сессии "%d"' % session)
-            # for supposed_key in self.single_files(files):
-            #     self.get_result('single', session, supposed_key, text)
-            # for supposed_key in self.double_files(files):
-            #     self.get_result('double', session, supposed_key, text)
 
 
 if __name__ == '__main__':
-    text = None
-    file_in = '%s\\test3' % sys.path[0]
-    out_name = ''.join([choice(ascii_lowercase) for i in range(10)])
-    file_out = '%s\\temp\\%s' % (sys.path[0], out_name)
-    Bruteforce().test(text, file_in, file_out)
-
+    _text = None
+    _file_in = '%s\\test3' % sys.path[0]
+    _out_name = ''.join([choice(ascii_lowercase) for i in range(10)])
+    _file_out = '%s\\temp\\%s' % (sys.path[0], _out_name)
+    Bruteforce().test(_text, _file_in, _file_out)
