@@ -4,6 +4,8 @@ from re import findall
 
 files = listdir('log_test/single')
 result = {}
+count_files = {}
+answer = {}
 
 index = 1
 for file in files:
@@ -11,6 +13,8 @@ for file in files:
         data = f.read()
         test = findall(r'(True|False [\d]+ [\w]*)', data)
         result[index] = test
+        count_files[index] = int(file.split('_')[-1])
+        answer[count_files[index]] = []
         index += 1
 
 trues = {}
@@ -28,4 +32,6 @@ for key in result.keys():
     keys_file[key] = len([_ for _ in result[key] if _[-4:] == 'True' and len(_) > 4])
     # print(key, trues[key], lens[key], lens[key] / 100,
     # trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
-    print(key, trues[key], lens[key], trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
+    answer[count_files[key]].append((trues[key], lens[key], trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key]))
+    print(count_files[key], trues[key], lens[key], trues[key] / (lens[key] / 100), keys_file[key], not_keys_file[key])
+# print(answer)
