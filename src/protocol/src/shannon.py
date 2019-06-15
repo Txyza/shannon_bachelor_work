@@ -3,7 +3,7 @@ from os import listdir
 
 
 class Shannon:
-    def __init__(self, count_files_code=4):
+    def __init__(self, count_files_key=4):
         # Количество файлов для шифрования
         self.count_files = 1024
         # Список файлов для шифрования
@@ -14,7 +14,8 @@ class Shannon:
         self.helper_dir = '..\\..\\helper'
         # Ключ шифрования
         self.key = ''
-        self.count_files_code = count_files_code
+        # Количество ключей для шифрования
+        self.count_files_key = count_files_key
 
     def _selection(self, private_key=124124):
         """
@@ -45,7 +46,7 @@ class Shannon:
         :return:
         """
         seed(private_key)
-        count_files = self.count_files_code
+        count_files = self.count_files_key
         self.files_code = set()
         while len(self.files_code) < count_files:
             self.files_code.add("%s\\text\\%s" % (self.helper_dir, choice(self.files)))
