@@ -1,15 +1,16 @@
 import sys
+import os
 from random import choice
-from string import ascii_lowercase
 from src.protocol.src.shannon import Shannon
 from test_.book.check import BookStack
 from itertools import combinations
+from string import ascii_uppercase, ascii_lowercase, digits, hexdigits, whitespace, ascii_letters, punctuation
+
 
 class Bruteforce:
-
     def __init__(self):
         # Количество сессий тестирования
-        self.count_session = 50
+        self.count_session = 100
         # Номер сессии
         self.session = None
         # количество файлов для тестирования
@@ -24,6 +25,8 @@ class Bruteforce:
         self.out_file_name = ''
         # Количество тестов стопка книг
         self.N = 1
+        self.string = ascii_uppercase+ascii_lowercase+digits+hexdigits+whitespace+ascii_letters+punctuation
+        self.list_dir = os.listdir('./code')
 
     @staticmethod
     def xor(answer, text):
@@ -142,6 +145,23 @@ class Bruteforce:
                 self._switch(text, file_in, file_out, exploit)
                 self._check_result(exploit, 'single', f)
 
+    def _test_not_exploit(self, text, file_in, file_out, count_files_key=4, session=1):
+        """
+        Методя для шифрования и проверки исходной последовательности
+        :param text:
+        :param file_in:
+        :param file_out:
+        :return:
+        """
+        self.session = session
+        self.out_file_name = file_out.split('\\')[-1]
+        self.test_file = 'temp\\test_%s' % self.out_file_name
+        cipher, self.files, self.keys = Shannon(count_files_key).encode(text, file_in, file_out)
+        with open(r"log_test/%s/session_keys_%d" % ('not_exp', count_files_key), 'a') as f:
+            check_result = BookStack().check(file=file_out)
+            print(check_result)
+            self.get_result('not_exp', check_result[1], '', None, f)
+
     def _brute_key_file(self, text, file_in, file_out, count_files_key=4, session=1):
         """
         Метод для перебора файлов, входящих в список ключей
@@ -178,14 +198,18 @@ class Bruteforce:
         self.out_file_name = file_out.split('\\')[-1]
         self.test_file = 'temp\\test_%s' % self.out_file_name
         cipher, self.files, self.keys = Shannon(count_files_key).encode(text, file_in, file_out)
-        with open(r"log_test/%s/session_%s_%s_key_%d" %
-                  ('keys', self.out_file_name, self.session, count_exploit_file), 'a') as f:
-            f.write('\n\nЗапуск сессии {}\n'.format(session))
-            for exploit in combinations(self.keys, count_exploit_file):
-                # print('-' * 30)
-                # print('Взлом набором ключевых файлов "%s"' % str(exploit))
-                self._switch(text, file_in, file_out, exploit)
-                self._check_result(exploit, 'keys', f)
+        for i in range(len(self.files)):
+            self.files[i] = '..\\..\\helper\\text\\' + self.files[i]
+        for i in range(0, count_files_key+1):
+            file_decode = list(self.keys)[:i] + self.files[:count_files_key-i]
+            with open(r"log_test/%s/session_%s_%s_key_%d_keys_%d_other_%d" %
+                      ('key', self.out_file_name, self.session, count_exploit_file, i, count_files_key-i), 'a') as f:
+                # f.write('\n\nЗапуск сессии {}\n'.format(session))
+                for exploit in combinations(file_decode, count_exploit_file):
+                    # print('-' * 30)
+                    # print('Взлом набором ключевых файлов "%s"' % str(exploit))
+                    self._switch(text, file_in, file_out, exploit)
+                    self._check_result(exploit, 'key', f)
 
     def _check_result(self, exploit, path='single', file_in=None):
         """
@@ -218,25 +242,42 @@ class Bruteforce:
         """
         if text:
             text = bytearray(text.encode())
-        for count_files_key in range(16, 256):
+        for count_files_key in range(40, 50, 2):
             for session in range(self.count_session):
+                file_in = './code/' + choice(self.list_dir)
+                print(file_in)
                 self.session = session
                 # print('-' * 30)
-                print('Запуск сессии "%d" с ключами %d' % (session, count_files_key))
+                # print('Запуск сессии "%d" с ключами %d' % (session, count_files_key))
                 # count_files_key = 5
                 # Запуск брутфорса по всем файлам
-                self._brute_all(text, file_in, file_out, count_files_key, session)
+                # self._brute_all(text, file_in, file_out, count_files_key, session)
+                # Проверка исходной последовательности
+                self._test_not_exploit(text, file_in, file_out, count_files_key, session)
                 # Запуск с 1 ключевым файлом
                 # self._brute_key_file(text, file_in, file_out, count_files_key, session)
                 # Запуск с N ключевых файлов
-                # count_exploit_file = 4
+                # count_exploit_file = count_files_key
                 # self._brute_keys_files(text, file_in, file_out, count_files_key, count_exploit_file, session)
                 # print('Окончание сессии "%d"' % session)
+
+    def create_files(self):
+        with open('test', 'w') as f:
+            f.write(''.join([choice(self.string) for _ in range(5000000)]))
+
+    @staticmethod
+    def check_files():
+        import os
+        for path in os.listdir('../../helper/text'):
+            path = '../../helper/text/' + path
+            if not BookStack().check(file=path)[1]:
+                print(path)
+                os.remove(path)
 
 
 if __name__ == '__main__':
     _text = None
-    _file_in = '%s\\test3' % sys.path[0]
+    _file_in = '%s\\test' % sys.path[0]
     _out_name = ''.join([choice(ascii_lowercase) for i in range(10)])
     _file_out = '%s\\temp\\%s' % (sys.path[0], _out_name)
     Bruteforce().test(_text, _file_in, _file_out)

@@ -39,10 +39,13 @@ class BookStack:
         :param result:
         :return:
         """
-        if float(result) <= self.Q05:
-            return text, True
-        else:
-            return text, False
+        try:
+            if float(result) <= self.Q05:
+                return text, True
+            else:
+                return text, False
+        except:
+            pass
 
     def _check(self, text=None, file=None):
         """

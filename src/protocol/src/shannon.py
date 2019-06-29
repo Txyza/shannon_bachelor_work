@@ -23,8 +23,9 @@ class Shannon:
         :param private_key:
         :return:
         """
+        seed(private_key)
         self._selection_files()
-        self._selection_files_code(private_key)
+        self._selection_files_code()
 
     def _selection_files(self):
         """
@@ -39,17 +40,28 @@ class Shannon:
             self.files.add(choice(file_list))
         self.files = list(self.files)
 
-    def _selection_files_code(self, private_key=124124):
+    def _selection_files_code(self):
         """
         Метод выбирает файлы, которыми будет использовать для шифрования
         :param private_key:
         :return:
         """
-        seed(private_key)
         count_files = self.count_files_key
         self.files_code = set()
         while len(self.files_code) < count_files:
             self.files_code.add("%s\\text\\%s" % (self.helper_dir, choice(self.files)))
+
+    @staticmethod
+    def _xor_key(text, code):
+        """
+        Метод выполняет операцию XOR к 2 последовательностям bytearray
+        :param text:
+        :param code:
+        :return:
+        """
+        for index in range(len(text)):
+            text[index] = text[index] ^ code[index % len(code)]
+        return text
 
     @staticmethod
     def _xor(text, code):
@@ -70,8 +82,12 @@ class Shannon:
         """
         for file in self.files_code:
             with open(file, 'rb') as f:
-                code = bytearray(f.read())
-                self.key = self._xor(self.key, code) if self.key else code
+                code = bytearray(f.read())*2250
+                if self.key:
+                    self.key, code = (code, self.key) if len(code) > len(self.key) else (self.key, code)
+                    self.key = self._xor(self.key, code)
+                else:
+                    self.key = code
 
     def _message_with_key(self, text):
         """
